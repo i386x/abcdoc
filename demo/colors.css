@@ -1,0 +1,13 @@
+/*
+ * DoIt! Doc Colors
+ */
+
+.dd-black, .dd-hover-black:hover {
+  color: #fff !important;
+  background-color: rgb(37, 37, 37);
+}
+
+.dd-red, .dd-hover-red:hover {
+  color: #fff !important;
+  background-color: #c00 !important;
+}

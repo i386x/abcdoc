@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+  <head>
+    <meta http-equiv="content-language" content="en" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Jiří Kučera" />
+    <meta name="keywords" content="documentation, template, sample" />
+    <meta name="description" content="Documentation Template Sample" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="../template/static/css/doitdoc.css" />
+    <script type="text/javascript" src="../template/static/js/doitdoc.js"></script>
+    <title>Documentation Template Sample</title>
+  </head>
+
+  <body>
+
+    <!-- header -->
+    <div id="header" class="dd-header dd-red">
+      <h1>Documentation Template Sample</h1>
+    </div>
+
+    <div id="content" class="dd-container">
+
+      <!-- left side navigation bar -->
+      <div class="dd-navbar dd-darkgrey">
+        <a href="#introduction">Introduction</a>
+        <a href="#table-of-contents">Table of Contents</a>
+        <a href="#supported-elements">Supported Elements</a>
+      </div>
+
+      <!-- content -->
+      <div id="main" class="dd-main">
+
+        <h1 id="introduction">1&nbsp;&nbsp;Introduction</h1>
+        <p>
+          This sample demonstrates look and feel of all introduced elements
+          types.
+        </p>
+
+        <h1 id="table-of-contents">2&nbsp;&nbsp;Table of Contents</h1>
+        <div id="tocA-mb-i" class="dd-measure-box">9&nbsp;</div>
+        <div id="tocA-mb-ii" class="dd-measure-box">9.9&nbsp;</div>
+        <ul id="tocA-i" class="dd-toc">
+          <li><a href="#introduction"><span class="tocA-lab-i">1 </span>Introduction</a></li>
+          <li><a href="#table-of-contents"><span class="tocA-lab-i">2 </span>Table of Contents</a></li>
+          <li>
+            <a href="#supported-elements"><span class="tocA-lab-i">3 </span>Supported Elements</a>
+            <ul id="tocA-ii">
+              <li>
+                <a href="#headers"><span class="tocA-lab-ii">3.1 </span>Headers</a>
+                <ul id="tocA-iii">
+                  <li><a href="#type-3-headers">Type 3 headers</a></li>
+                </ul>
+              </li>
+              <li><a href="#lists"><span class="tocA-lab-ii">3.2 </span>Lists</a></li>
+              <li><a href="#annotations"><span class="tocA-lab-ii">3.3 </span>Annotations</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h1 id="supported-elements">3&nbsp;&nbsp;Supported Elements</h1>
+        <p>
+          This section demonstrates headers, lists, tables, figures, code
+          annotations, code snippets and other elements.
+        </p>
+
+        <h2 id="headers">3.1&nbsp;&nbsp;Headers</h2>
+        <p>
+          You always saw type 1 and 2 headers in action.
+        </p>
+
+        <h3 id="type-3-headers">Type 3 headers</h3>
+        <p>
+          More than 3 types of headers are not recommended. It is a good
+          typographical convention to have headers of a type 3 and more
+          unnumbered.
+        </p>
+
+        <h2 id="lists">3.2&nbsp;&nbsp;Lists</h2>
+        <p>Unordered list:</p>
+        <ul>
+          <li>
+            Fruit
+            <ul>
+              <li>Apple</li>
+              <li>Lemon</li>
+              <li>Strawberry</li>
+            </ul>
+          </li>
+          <li>
+            Vegetable
+            <ul>
+              <li>Carrot</li>
+              <li>Onion</li>
+              <li>Garlic</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Ordered list:</p>
+        <ol>
+          <li>
+            To buy:
+            <ol>
+              <li>Butter</li>
+              <li>Cheese</li>
+              <li>Milk</li>
+            </ol>
+          </li>
+          <li>
+            To do:
+            <ol>
+              <li>Read inbox</li>
+              <li>Report bugs</li>
+              <li>Send patches</li>
+            </ol>
+          </li>
+        </ol>
+
+        <h2 id="annotations">3.3&nbsp;&nbsp;Annotations</h2>
+        <p>
+          Example below shows a class member function annotation.
+        </p>
+        <div class="dd-annotation">
+          <div class="head dd-icontainer dd-font-code dd-green">
+            <h4>GraphicsDriver::DrawLine</h4>
+          </div>
+          <div class="tail dd-icontainer dd-lightgrey">
+            <div class="declaration">
+              <h4>Declaration</h4>
+<pre class="dd-code-fontsize dd-indent dd-code-plain dd-font-code dd-white">GraphicsDriver::Status GraphicsDriver::DrawLine(
+    int x1, int y1, int x2, int y2,
+    Color &amp; color = Color::black
+);</pre>
+            </div>
+            <div class="description">
+              <h4>Description</h4>
+              <p class="dd-indent">Draw line from point to point.</p>
+            </div>
+            <div class="parameters">
+              <h4>Parameters</h4>
+              <table class="dd-indent dd-deftable dd-white">
+                <tr>
+                  <td class="name"><code class="dd-font-code dd-code-fontsize">int x1</code></td>
+                  <td class="description">source <span class="dd-italic">x</span>-coord</td>
+                </tr>
+                <tr>
+                  <td class="name"><code class="dd-font-code dd-code-fontsize">int y1</code></td>
+                  <td class="description">source <span class="dd-italic">y</span>-coord</td>
+                </tr>
+                <tr>
+                  <td class="name"><code class="dd-font-code dd-code-fontsize">int x2</code></td>
+                  <td class="description">destination <span class="dd-italic">x</span>-coord</td>
+                </tr>
+                <tr>
+                  <td class="name"><code class="dd-font-code dd-code-fontsize">int y2</code></td>
+                  <td class="description">destination <span class="dd-italic">y</span>-coord</td>
+                </tr>
+                <tr>
+                  <td class="name"><code class="dd-font-code dd-code-fontsize">Color &amp; color</code></td>
+                  <td class="description">line color</td>
+                </tr>
+              </table>
+            </div>
+            <div class="returns">
+              <h4>Returns</h4>
+              <p class="dd-indent">
+                <code class="dd-font-code dd-code-fontsize dd-text-darkred">GraphicsDriver::Status::OK</code>
+                if operation was successfuly completed. See
+                <code class="dd-font-code dd-code-fontsize dd-text-darkred"><a href="#">GraphicsDriver::Status</a></code>.
+              </p>
+            </div>
+            <div class="exceptions">
+              <h4>Exceptions</h4>
+              <p class="dd-indent">None.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div id="footer" class="dd-footer dd-black">
+      <p>
+        Created by <a href="#">DoIt! Doc</a> and <a href="#">Sphinx</a>
+      </p>
+    </div>
+
+    <!-- fix the measures -->
+    <script>
+      $dd.dimen("content", "margin-top", $dd.h("header"));
+      $dd.dimen("main", "padding-bottom", $dd.h("footer") + 45);
+      $dd.toc("A", 32);
+    </script>
+  </body>
+
+</html>
