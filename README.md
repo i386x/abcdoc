@@ -1,3 +1,3 @@
-# *DoIt! Doc*: Sphinx Template for *DoIt!* Documentation
+# *DoIt! Doc*: Sphinx Extension for *DoIt!* Documentation
 
 WIP

@@ -1,7 +1,7 @@
 /**
  * \file    ./static/js/doitdoc.js
  * \author  Jiří Kučera, <sanczes AT gmail.com>
- * \stamp   2018-05-05 11:45:06 (UTC+0100, DST+0100)
+ * \stamp   2018-05-05 11:45:06 +0200
  * \project DoIt! Doc: Sphinx Template for DoIt! Documentation
  * \license MIT
  * \version 0.0.0
