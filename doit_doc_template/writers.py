@@ -29,3 +29,66 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
+
+from docutils import nodes
+from docutils.writers.html4css1 import Writer
+
+class DoItHtmlWriter(Writer):
+    """
+    """
+
+    def __init__(self, builder):
+        """
+        """
+
+        super().__init__()
+        self.builder = builder
+    #-def
+
+    def translate(self):
+        """
+        """
+
+        self.visitor = visitor = self.builder.create_translator(
+            self.builder, self.document
+        )
+        self.document.walkabout(visitor)
+        self.output = self.visitor.astext()
+    #-def
+#-class
+
+class DoItHtmlTranslator(nodes.NodeVisitor):
+    """
+    """
+
+    def __init__(self, builder, *args, **kwargs):
+        """
+        """
+
+        super().__init__(*args, **kwargs)
+        self.builder = builder
+        self.dispatcher = self.builder.template.get_dispatcher()
+        self.output = ""
+    #-def
+
+    def unknown_visit(self, node):
+        """
+        """
+
+        self.dispatcher.visit(self, node)
+    #-def
+
+    def unknown_departure(self, node):
+        """
+        """
+
+        self.dispatcher.depart(self, node)
+    #-def
+
+    def astext(self):
+        """
+        """
+
+        return self.output
+    #-def
+#-class

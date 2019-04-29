@@ -37,3 +37,17 @@ IN THE SOFTWARE.\
 __version__ = '0.0.0'
 
 __url__ = 'https://github.com/i386x/doit-doc-template/'
+
+from .builders import DoItHtmlBuilder
+
+def setup(app):
+    """
+    """
+
+    app.add_builder(DoItHtmlBuilder)
+    return {
+        'version': __version__,
+        'parallel_read_safe': False,
+        'parallel_write_safe': False
+    }
+#-def
