@@ -1,0 +1,54 @@
+#                                                         -*- coding: utf-8 -*-
+#! \file    ~/doit_doc_template/templates/base/template.yml
+#! \author  Jiří Kučera, <sanczes AT gmail.com>
+#! \stamp   2019-04-22 11:30:10 +0200
+#! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
+#! \license MIT
+#! \version 0.0.0
+#! \brief   Base template entry point.
+#
+
+components:
+
+  - name: macros
+    type: group
+    require:
+      - head
+      - text
+      - navbar
+      - toc
+      - utils
+
+  - name: head
+    type: macro
+    files:
+      - head.mac
+
+  - name: text
+    type: macro
+    requires:
+      - utils
+    files:
+      - text.mac
+
+  - name: navbar
+    type: macro
+    requires:
+      - utils
+    files:
+      - navbar.mac
+
+  - name: toc
+    type: macro
+    requires:
+      - utils
+    files:
+      - toc.mac
+
+  - name: utils
+    type: macro
+    files:
+      - utils.mac
+
+dispatcher:
+  - dispatcher.yml

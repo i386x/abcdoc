@@ -1,0 +1,36 @@
+#                                                         -*- coding: utf-8 -*-
+#! \file    ~/doit_doc_template/templates/base/nodes.yml
+#! \author  Jiří Kučera, <sanczes AT gmail.com>
+#! \stamp   2019-02-27 10:11:21 +0100
+#! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
+#! \license MIT
+#! \version 0.0.0
+#! \brief   Specify how to handle document nodes.
+#
+
+ddhook_before_file:
+  - set document_title config.html_title
+
+visit_substitution_definition:
+  - skip
+
+depart_substitution_definition:
+  - pass
+
+visit_document:
+  - pass
+
+depart_document:
+  - pass
+
+visit_emphasis:
+  - pass
+
+depart_emphasis:
+  - render: emphasize _1|text
+
+visit_text:
+  - pass
+
+depart_text:
+  - render: html_escape _node|text

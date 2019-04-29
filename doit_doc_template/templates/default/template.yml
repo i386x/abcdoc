@@ -1,0 +1,12 @@
+#                                                         -*- coding: utf-8 -*-
+#! \file    ~/doit_doc_template/templates/default/template.yml
+#! \author  Jiří Kučera, <sanczes AT gmail.com>
+#! \stamp   2019-04-22 11:17:29 +0200
+#! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
+#! \license MIT
+#! \version 0.0.0
+#! \brief   Default template entry point.
+#
+
+include:
+  - base
