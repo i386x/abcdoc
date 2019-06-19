@@ -1,18 +1,18 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/writers.py
+#! \file    ~/doit_doc_template/core/errors.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2018-08-26 18:09:18 +0200
+#! \stamp   2019-04-22 21:10:16 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Sphinx writer classes.\
+Exception classes and error reporting.\
 """
 
 __license__ = """\
-Copyright (c) 2014 - 2018 Jiří Kučera.
+Copyright (c) 2014 - 2019 Jiří Kučera.
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -30,67 +30,88 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from docutils.nodes import NodeVisitor
-from docutils.writers.html4css1 import Writer
+import os
 
-class DoItHtmlWriter(Writer):
+from sphinx.errors import ExtensionError
+
+class InternalError(ExtensionError):
     """
     """
-    __slots__ = ["builder"]
+    __slots__ = []
 
-    def __init__(self, builder):
+    def __init__(self, filename, location, detail):
         """
         """
 
-        Writer.__init__(self)
-        self.builder = builder
-    #-def
-
-    def translate(self):
-        """
-        """
-
-        self.visitor = visitor = self.builder.create_translator(
-            self.builder, self.document
-        )
-        self.document.walkabout(visitor)
-        self.output = self.visitor.astext()
+        ExtensionError.__init__(self, "[INTERNAL ERROR] <{}>::{}: {}.".format(
+            os.path.realpath(filename), location, detail
+        ))
     #-def
 #-class
 
-class DoItHtmlTranslator(NodeVisitor):
+class ReadFileError(ExtensionError):
     """
     """
-    __slots__ = ["builder", "dispatcher", "output"]
+    __slots__ = []
 
-    def __init__(self, builder, *args, **kwargs):
+    def __init__(self, filename):
         """
         """
 
-        NodeVisitor.__init__(self, *args, **kwargs)
-        self.builder = builder
-        self.dispatcher = self.builder.template.dispatcher
-        self.output = ""
+        ExtensionError.__init__(
+            self, "The content of <{}> cannot be read.".format(filename)
+        )
     #-def
+#-class
 
-    def unknown_visit(self, node):
+class YamlError(ExtensionError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, error):
         """
         """
 
-        self.dispatcher.visit(self, node)
+        ExtensionError.__init__(self, "Error {}".format(str(error)))
     #-def
+#-class
 
-    def unknown_departure(self, node):
+class YamlDataFormatError(YamlError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, error):
         """
         """
 
-        self.dispatcher.depart(self, node)
+        YamlError.__init__(self, error)
     #-def
+#-class
 
-    def astext(self):
+class DispatcherError(ExtensionError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, detail):
         """
         """
 
-        return self.output
+        ExtensionError.__init__(self, detail)
+    #-def
+#-class
+
+class UnhandledEventError(DispatcherError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, event):
+        """
+        """
+
+        DispatcherError.__init__(self, "Unhandled event '{}'.".format(event))
     #-def
 #-class

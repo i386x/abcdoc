@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/helpers/errors.py
+#! \file    ~/doit_doc_template/core/library.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-04-22 21:10:16 +0200
+#! \stamp   2019-06-16 11:41:11 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Exception classes and error reporting.\
+Library loader and holder.\
 """
 
 __license__ = """\
@@ -30,16 +30,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from sphinx.errors import ExtensionError
-
-class DataFormatError(ExtensionError):
+class Library(object):
     """
     """
+    __slots__ = ["template"]
 
-    def __init__(self, message):
+    def __init__(self, template):
         """
         """
 
-        super().__init__("Invalid format of input data: %s." % message)
+        self.template = template
+    #-def
+
+    def load_from_file(self, filename):
+        """
+        """
+
+        pass
     #-def
 #-class

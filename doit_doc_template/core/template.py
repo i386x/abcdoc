@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/helpers/dispatcher.py
+#! \file    ~/doit_doc_template/core/template.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-04-20 13:42:49 +0200
+#! \stamp   2019-04-20 14:32:29 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Node dispatcher.\
+Templates management.\
 """
 
 __license__ = """\
@@ -29,3 +29,51 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
+
+from .component import ComponentSet
+from .context import Context
+from .dispatcher import Dispatcher
+from .info import TemplateInfo
+from .layout import LayoutSet
+from .library import Library
+from .meta import TemplateMeta
+from .static import StaticContent
+
+class Template(object):
+    """
+    """
+    __slots__ = [
+        "builder", "bases", "context", "dispatcher", "components", "layouts",
+        "static", "meta", "info", "library"
+    ]
+
+    def __init__(self, builder):
+        """
+        """
+
+        self.builder = builder
+        self.bases = []
+        self.context = Context(self)
+        self.dispatcher = Dispatcher(self)
+        self.components = ComponentSet(self)
+        self.layouts = LayoutSet(self)
+        self.static = StaticContent(self)
+        self.meta = TemplateMeta(self)
+        self.info = TemplateInfo(self)
+        self.library = Library(self)
+    #-def
+
+    def load(self, templatedir):
+        """
+        """
+
+        return self
+    #-def
+
+    def deploy(self):
+        """
+        """
+
+        return self
+    #-def
+#-class

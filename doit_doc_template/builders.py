@@ -31,42 +31,54 @@ IN THE SOFTWARE.\
 """
 
 import os
-import sys
 
 from docutils.frontend import OptionParser
 from docutils.io import FileOutput
 
 from sphinx.builders import Builder
+from sphinx.errors import ExtensionError
 from sphinx.locale import __
 from sphinx.util import logging
 from sphinx.util.osutil import SEP
 
+from .core.keywords import KW_VARIABLES
+from .core.utils import get_config_value, Importer
 from .writers import DoItHtmlTranslator, DoItHtmlWriter
 
 logger = logging.getLoger(__name__)
 
+builtin_templates_dir = os.path.join(
+    os.path.dirname(os.path.realpath(__file)), "templates"
+)
+
 class DoItHtmlBuilder(Builder):
     """
     """
-    name = 'doit-html'
-    format = 'html'
+    name = "doit-html"
+    format = "html"
     epilog = "The HTML pages are in %(outdir)s."
 
-    out_suffix = '.html'
+    out_suffix = ".html"
     default_translator_class = DoItHtmlTranslator
-    supported_image_types = [ 'image/png' ]
+    supported_image_types = ["image/png"]
+
+    __slots__ = [
+        "context", "template_cache", "template", "docwriter", "docsettings"
+    ]
 
     def __init__(self, app):
         """
         """
 
-        super().__init__(app)
+        Builder.__init__(self, app)
     #-def
 
     def init(self):
         """
         """
 
+        self.context = {}
+        self.template_cache = {}
         self.template = None
         self.docwriter = None
         self.docsettings = None
@@ -84,9 +96,9 @@ class DoItHtmlBuilder(Builder):
         """
         """
 
-        if docname == 'index':
+        if docname == "index":
             return ""
-        if docname.endswith(SEP + 'index'):
+        if docname.endswith(SEP + "index"):
             return docname[:-5]
         return docname + SEP
     #-def
@@ -95,20 +107,22 @@ class DoItHtmlBuilder(Builder):
         """
         """
 
-        self.template = self.get_template()
+        self.init_variables()
+        self.get_template()
         self.docwriter = DoItHtmlWriter(self)
         self.docsettings = OptionParser(
             defaults = self.env.settings,
             components = (self.docwriter,),
             read_config_files = True
         ).get_default_values()
+        self.template.deploy()
     #-def
 
     def write_doc(self, docname, doctree):
         """
         """
 
-        html_file_suffix = self.get_builder_config('file_suffix', 'html')
+        html_file_suffix = self.get_builder_config("file_suffix", "html")
 
         if html_file_suffix is not None:
             self.out_suffix = html_file_suffix
@@ -116,7 +130,7 @@ class DoItHtmlBuilder(Builder):
         docfile = docname + self.out_suffix
         destination = FileOutput(
             destination_path = os.path.join(self.outdir, docfile),
-            encoding = 'utf-8'
+            encoding = "utf-8"
         )
         doctree.settings = self.docsettings
         self.docwriter.write(doctree, destination)
@@ -129,53 +143,63 @@ class DoItHtmlBuilder(Builder):
         pass
     #-def
 
-    def get_template(self):
+    def init_variables(self):
         """
         """
 
         app = self.app
-        confdir = app.confdir
+        srcdir = app.srcdir
         config = app.config
-        default_template = load_template('default')
-        template = None
 
-        if confdir is None:
-            logger.warning(__(
-                "'confdir' is not specified, using default template."
-            ))
-            return default_template
-
-        templates_path = get_config_value(config, 'templates_path') or []
-        html_theme_path = self.get_builder_config('theme_path', 'html') or []
+        templates_path = get_config_value(config, "templates_path") or []
+        html_theme_path = self.get_builder_config("theme_path", "html") or []
         templates_path = html_theme_path + templates_path
-        templates_path = [os.path.join(confdir, p) for p in templates_path]
+        templates_path = [os.path.join(srcdir, p) for p in templates_path]
+        templates_path.append(builtin_templates_dir)
 
-        if not templates_path:
-            logger.warning(__(
-                "Path to templates is not specified, using default template."
-            ))
-            return default_template
-
-        html_theme = self.get_builder_config('theme', 'html')
+        html_theme = self.get_builder_config("theme", "html")
 
         if not html_theme:
             logger.warning(__("HTML theme is not specified, using default."))
-            return default_template
+            html_theme = "default"
 
-        with Importer(templates_path, False):
-            module = __import__(html_theme, None, None, ['load'])
-            if hasattr(module, 'load'):
-                template = module.load()
+        self.context[KW_VARIABLES] = dict(
+            _srcdir = srcdir,
+            _outdir = app.outdir,
+            _config = config,
+            _path = templates_path,
+            _name = html_theme
+        )
+    #-def
 
-        if template is None:
-            template = load_template(html_theme)
+    def get_template(self, name=None):
+        """
+        """
 
-        if template is None:
-            logger.warning(__(
-                "Template/Theme '%s' was not found, using default."
-            ) % (html_theme,))
-            template = default_template
+        variables = self.context[KW_VARIABLES]
 
-        return template
+        if name is None:
+            name = variables["_name"]
+
+        if name in self.template_cache:
+            self.template = self.template_cache[name]
+            return
+
+        self.template = self.load_template(variables["_path"], name)
+        if self.template is None:
+            raise ExtensionError("Template '{}' was not found.".format(name))
+
+        self.template_cache[name] = self.template
+    #-def
+
+    def load_template(self, path, name):
+        """
+        """
+
+        with Importer(path, False):
+            module = __import__(name, None, None, ["load"])
+            if hasattr(module, "load"):
+                return module.load(self)
+        return None
     #-def
 #-class

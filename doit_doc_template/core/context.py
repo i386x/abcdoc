@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/helpers/__init__.py
+#! \file    ~/doit_doc_template/core/context.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-04-19 19:24:51 +0200
+#! \stamp   2019-05-18 21:07:38 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Subpackage with helpers for builders and writers.\
+Context definition holder.\
 """
 
 __license__ = """\
@@ -29,3 +29,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
+
+from .keywords import CONTEXT_KEYS, KW_VARIABLES
+from .utils import ensure_key, read_yaml_file
+from .validators import expect_type, get_and_check, valid_keys
+
+class Context(object):
+    """
+    """
+    __slots__ = ["template", "variables"]
+
+    def __init__(self, template):
+        """
+        """
+
+        self.template = template
+        self.variables = {}
+    #-def
+
+    def load_from_file(self, filename):
+        """
+        """
+
+        data = read_yaml_file(filename)
+        if data is None:
+            return
+        valid_keys(data, CONTEXT_KEYS)
+        variables = get_and_check(data, KW_VARIABLES, {}, dict)
+        for v in variables:
+            expect_type(v, str)
+            self.variables[v] = variables[v]
+    #-def
+
+    def deploy_variables(self, force=False):
+        """
+        """
+
+        context = self.template.builder.context
+        ensure_key(context, KW_VARIABLES, {})
+        variables = context.get(KW_VARIABLES)
+        for var in self.variables:
+            ensure_key(variables, var, self.variables[var], force)
+    #-def
+#-class

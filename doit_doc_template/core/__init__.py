@@ -1,19 +1,15 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/__init__.py
+#! \file    ~/doit_doc_template/core/__init__.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2018-08-07 12:20:44 +0200
+#! \stamp   2019-04-19 19:24:51 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Sphinx extension that provides DoIt! documentation templates.\
+Subpackage with helpers for builders and writers.\
 """
-
-__pkgname__ = "doit_doc_template"
-__author__ = "Jiří Kučera"
-__author_email__ = "sanczes AT gmail.com".replace(" AT ", "@")
 
 __license__ = """\
 Copyright (c) 2014 - 2019 Jiří Kučera.
@@ -33,21 +29,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
-
-__version__ = "0.0.0"
-
-__url__ = "https://github.com/i386x/doit-doc-template/"
-
-from .builders import DoItHtmlBuilder
-
-def setup(app):
-    """
-    """
-
-    app.add_builder(DoItHtmlBuilder)
-    return {
-        "version": __version__,
-        "parallel_read_safe": False,
-        "parallel_write_safe": False
-    }
-#-def
