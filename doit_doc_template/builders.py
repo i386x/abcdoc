@@ -115,7 +115,7 @@ class DoItHtmlBuilder(Builder):
             components = (self.docwriter,),
             read_config_files = True
         ).get_default_values()
-        self.template.deploy()
+        self.template.setup()
     #-def
 
     def write_doc(self, docname, doctree):

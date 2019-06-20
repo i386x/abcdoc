@@ -70,7 +70,7 @@ class Template(object):
         return self
     #-def
 
-    def deploy(self):
+    def setup(self):
         """
         """
 
