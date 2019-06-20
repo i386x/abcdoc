@@ -1,0 +1,19 @@
+#                                                         -*- coding: utf-8 -*-
+#! \file    ~/doit_doc_template/templates/base/meta/main.yml
+#! \author  Jiří Kučera, <sanczes AT gmail.com>
+#! \stamp   2019-06-20 07:01:49 +0200
+#! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
+#! \license MIT
+#! \version 0.0.0
+#! \brief   Base template meta definitions.
+#
+
+components:
+  header:
+    class: "{{ _config.class_prefix }}-header"
+  lnavbar:
+    class: "{{ _config.class_prefix }}-lnavbar"
+  table_of_contents:
+    title:
+      id: "table-of-contents"
+    class: "{{ _config.class_prefix }}-toc"

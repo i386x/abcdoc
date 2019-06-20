@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/templates/base/__init__.py
+#! \file    ~/doit_doc_template/templates/base/library/__init__.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-04-20 00:08:32 +0200
+#! \stamp   2019-06-20 07:30:16 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-Buildin templates basics.\
+Base template library.\
 """
 
 __license__ = """\
@@ -29,16 +29,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
-
-import os
-
-from doit_doc_template.core.template import Template
-
-templatedir = os.path.dirname(os.path.realpath(__file__))
-
-def load(builder):
-    """
-    """
-
-    return Template(builder).load(templatedir)
-#-def

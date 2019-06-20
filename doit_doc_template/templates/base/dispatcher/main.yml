@@ -1,15 +1,12 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/templates/base/nodes.yml
+#! \file    ~/doit_doc_template/templates/base/dispatcher/main.yml
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-02-27 10:11:21 +0100
+#! \stamp   2019-06-19 12:46:18 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version 0.0.0
-#! \brief   Specify how to handle document nodes.
+#! \brief   Base template dispatcher definition.
 #
-
-ddhook_before_file:
-  - set document_title config.html_title
 
 visit_substitution_definition:
   - skip
@@ -27,10 +24,11 @@ visit_emphasis:
   - pass
 
 depart_emphasis:
-  - render: emphasize _1|text
+  - render:
+      emphasize: "{{ node }}"
 
 visit_text:
   - pass
 
 depart_text:
-  - render: html_escape _node|text
+  - html_escape: "{{ node.text }}"
