@@ -63,7 +63,8 @@ class DoItHtmlBuilder(Builder):
     supported_image_types = ["image/png"]
 
     __slots__ = [
-        "context", "template_cache", "template", "docwriter", "docsettings"
+        "context", "template_cache", "template_stack", "template", "docwriter",
+        "docsettings"
     ]
 
     def __init__(self, app):
@@ -79,6 +80,7 @@ class DoItHtmlBuilder(Builder):
 
         self.context = {}
         self.template_cache = {}
+        self.template_stack = []
         self.template = None
         self.docwriter = None
         self.docsettings = None
@@ -108,7 +110,7 @@ class DoItHtmlBuilder(Builder):
         """
 
         self.init_variables()
-        self.get_template()
+        self.template = self.get_template()
         self.docwriter = DoItHtmlWriter(self)
         self.docsettings = OptionParser(
             defaults = self.env.settings,
@@ -182,14 +184,14 @@ class DoItHtmlBuilder(Builder):
             name = variables["_name"]
 
         if name in self.template_cache:
-            self.template = self.template_cache[name]
-            return
+            return self.template_cache[name]
 
-        self.template = self.load_template(variables["_path"], name)
-        if self.template is None:
+        template = self.load_template(variables["_path"], name)
+        if template is None:
             raise ExtensionError("Template '{}' was not found.".format(name))
 
-        self.template_cache[name] = self.template
+        self.template_cache[name] = template
+        return template
     #-def
 
     def load_template(self, path, name):

@@ -30,17 +30,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from .action import Action
+from .action import Action, ActionContext
 from .errors import UnhandledEventError
 from .keywords import ACTION_KEYS, KW_ACTION, KW_ARGS
 from .utils import read_yaml_file
 from .validators import \
     expect_type, get_and_check, invalid_data, valid_keys
 
+class Handler(object):
+    """
+    """
+    __slots__ = ["dispatcher", "name", "actions"]
+
+    def __init__(self, dispatcher, name, actions):
+        """
+        """
+
+        self.dispatcher = dispatcher
+        self.name = name
+        self.actions = actions
+    #-def
+
+    def __call__(self, *args, **kwargs):
+        """
+        """
+
+        context = ActionContext(self, args, kwargs)
+        for action in self.actions:
+            action(context)
+    #-def
+#-class
+
 class Dispatcher(object):
     """
     """
-    __slots__ = ["template", "handlers"]
+    __slots__ = ["template", "handlers", "rbases"]
 
     def __init__(self, template):
         """
@@ -48,15 +72,59 @@ class Dispatcher(object):
 
         self.template = template
         self.handlers = {}
+        self.rbases = []
     #-def
 
-    def handle_event(self, name, context):
+    def setup(self):
         """
         """
 
-        if name not in self.handlers:
+        self.rbases.extend(self.template.bases)
+        self.rbases.reverse()
+    #-def
+
+    def get_handler(self, name, visited=None):
+        """
+        """
+
+        if visited is None:
+            visited = []
+        if self in visited:
+            return None
+        visited.append(self)
+        if name in self.handlers:
+            return self.handlers[name]
+        for base in self.rbases:
+            handler = base.dispatcher.get_handler(name, visited)
+            if handler:
+                return handler
+        return None
+    #-def
+
+    def handle(self, name, *args, **kwargs):
+        """
+        """
+
+        handler = self.get_handler(name)
+        if handler is None:
             raise UnhandledEventError(name)
-        self.handlers[name](context)
+        handler(self.template, *args, **kwargs)
+    #-def
+
+    def visit(self, translator, node):
+        """
+        """
+
+        name = "visit_{}".format(node.__class__.__name__)
+        self.handle(name, translator=translator, node=node)
+    #-def
+
+    def depart(self, translator, node):
+        """
+        """
+
+        name = "depart_{}".format(node.__class__.__name__)
+        self.handle(name, translator=translator, node=node)
     #-def
 
     def load_from_file(self, filename):
@@ -69,7 +137,7 @@ class Dispatcher(object):
         expect_type(data, dict)
         for k in data:
             expect_type(k, str)
-            self.handlers[k] = self.compile_handler(data, k)
+            self.handlers[k] = Handler(self, k, self.compile_handler(data, k))
     #-def
 
     @classmethod

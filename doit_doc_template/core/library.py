@@ -30,22 +30,55 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
+from .utils import Importer
+
 class Library(object):
     """
     """
-    __slots__ = ["template"]
+    __slots__ = ["template", "library", "rbases"]
 
     def __init__(self, template):
         """
         """
 
         self.template = template
+        self.library = {}
+        self.rbases = []
     #-def
 
-    def load_from_file(self, filename):
+    def setup(self):
         """
         """
 
-        pass
+        self.rbases.extend(self.template.bases)
+        self.rbases.reverse()
+    #-def
+
+    def get_command(self, name, visited=None):
+        """
+        """
+
+        if visited is None:
+            visited = []
+        if self in visited:
+            return None
+        visited.append(self)
+        if name in self.library:
+            return self.library[name]
+        for base in self.rbases:
+            command = base.library.get_command(name, visited)
+            if command:
+                return command
+        return None
+    #-def
+
+    def load(self, path, name):
+        """
+        """
+
+        with Importer(path, False):
+            module = __import__(name, None, None, ["load"])
+            if hasattr(module, "load"):
+                self.library.update(module.load(self))
     #-def
 #-class

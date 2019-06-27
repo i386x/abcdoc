@@ -90,6 +90,23 @@ class YamlDataFormatError(YamlError):
     #-def
 #-class
 
+class CyclicDependencyError(ExtensionError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, template, where):
+        """
+        """
+
+        ExtensionError.__init__(
+            self, "In {} template {}: cyclic dependencies detected.".format(
+                template.locals["_templatedir"], where
+            )
+        )
+    #-def
+#-class
+
 class DispatcherError(ExtensionError):
     """
     """
@@ -113,5 +130,23 @@ class UnhandledEventError(DispatcherError):
         """
 
         DispatcherError.__init__(self, "Unhandled event '{}'.".format(event))
+    #-def
+#-class
+
+class CommandNotFoundError(ExtensionError):
+    """
+    """
+    __slots__ = []
+
+    def __init__(self, name):
+        """
+        """
+
+        mark = name.mark
+        ExtensionError.__init__(
+            self, "In <{}>, line {}, column {}: Unknown command: {}.".format(
+                mark.name, mark.line + 1, mark.column + 1, name
+            )
+        )
     #-def
 #-class

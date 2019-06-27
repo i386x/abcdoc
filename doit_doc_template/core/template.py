@@ -30,21 +30,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
+import os
+
 from .component import ComponentSet
 from .context import Context
 from .dispatcher import Dispatcher
 from .info import TemplateInfo
+from .keywords import CONFIG_KEYS, KW_BASES
 from .layout import LayoutSet
 from .library import Library
 from .meta import TemplateMeta
 from .static import StaticContent
+from .utils import read_yaml_file
+from .validators import get_and_check, list_of_strings, valid_keys
 
 class Template(object):
     """
     """
     __slots__ = [
-        "builder", "bases", "context", "dispatcher", "components", "layouts",
-        "static", "meta", "info", "library"
+        "builder", "bases", "locals", "context", "dispatcher", "components",
+        "layouts", "static", "meta", "info", "library"
     ]
 
     def __init__(self, builder):
@@ -53,6 +58,7 @@ class Template(object):
 
         self.builder = builder
         self.bases = []
+        self.locals = {}
         self.context = Context(self)
         self.dispatcher = Dispatcher(self)
         self.components = ComponentSet(self)
@@ -67,13 +73,70 @@ class Template(object):
         """
         """
 
-        return self
+        if templatedir in self.builder.template_stack:
+            return self
+        self.builder.template_stack.append(templatedir)
+        self.locals["_templatedir"] = templatedir
+        self.load_config(templatedir)
+        self.context.load_from_file(
+            os.path.join(templatedir, "context", "main.yml")
+        )
+        self.dispatcher.load_from_file(
+            os.path.join(templatedir, "dispatcher", "main.yml")
+        )
+        self.components.load_from_file(
+            os.path.join(templatedir, "components", "main.yml")
+        )
+        self.layouts.load_from_file(
+            os.path.join(templatedir, "layouts", "main.yml")
+        )
+        self.static.load_from_file(
+            os.path.join(templatedir, "static", "main.yml")
+        )
+        self.meta.load_from_file(
+            os.path.join(templatedir, "meta", "main.yml")
+        )
+        self.info.load_from_file(
+            os.path.join(templatedir, "info", "main.yml")
+        )
+        self.library.load(templatedir, "library")
+        self.builder.template_stack.pop()
     #-def
 
-    def setup(self):
+    def load_config(self, templatedir):
         """
         """
 
+        config = read_yaml_file(os.path.join(templatedir, "main.yml"))
+        if config is None:
+            return
+        valid_keys(config, CONFIG_KEYS)
+        self.load_bases(list_of_strings(get_and_check(config, KW_BASES, [])))
+    #-def
+
+    def load_bases(self, bases):
+        """
+        """
+
+        for base in bases:
+            self.bases.append(self.builder.get_template(base))
+    #-def
+
+    def setup(self, visited=None):
+        """
+        """
+
+        if visited is None:
+            visited = []
+        if self in visited:
+            return
+        visited.append(self)
+        for base in self.bases:
+            base.setup(visited)
+        self.context.resolve_variables()
+        self.context.deploy_variables(force=True)
+        self.dispatcher.setup()
+        self.library.setup()
         return self
     #-def
 #-class

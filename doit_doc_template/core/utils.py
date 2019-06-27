@@ -31,8 +31,10 @@ IN THE SOFTWARE.\
 """
 
 import inspect
+import os
 import sys
 
+from jinja2 import Environment, meta
 from yaml import load, MarkedYAMLError, YAMLError
 
 from .errors import ReadFileError, YamlError
@@ -97,6 +99,17 @@ def add_filename_to_yaml_error(error, filename):
         error.problem_mark.name = filename
 #-def
 
+def resolve_path(path):
+    """
+    """
+
+    parts = path.split("/")
+    parts = [x for x in parts if x]
+    parts = [(os.path.pardir if x == ".." else x) for x in parts]
+    parts = [(os.path.curdir if x == "." else x) for x in parts]
+    return os.path.join(*parts)
+#-def
+
 def read_utf8_file(filename):
     """
     """
@@ -129,6 +142,13 @@ def get_config_value(config, name, default=None):
     """
 
     return config.values.get(name, [default])[0]
+#-def
+
+def get_jinja2_template_variables(template):
+    """
+    """
+
+    return meta.find_undeclared_variables(Environment().parse(template))
 #-def
 
 class Importer(object):

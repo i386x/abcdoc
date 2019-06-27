@@ -75,6 +75,8 @@ def get_and_check(data, key, default=None, value_type=None):
     value = data.get(key)
     # Missing item means use default value
     if value is None:
+        if default is None:
+            return None
         value = data.wrap(default)
     # 'None' means no type checking
     if value_type is None:

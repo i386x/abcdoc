@@ -30,6 +30,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
+from .errors import CommandNotFoundError
+
+class ActionContext(object):
+    """
+    """
+    __slots__ = ["handler", "args", "kwargs"]
+
+    def __init__(self, handler, args, kwargs):
+        """
+        """
+
+        self.handler = handler
+        self.args = args
+        self.kwargs = kwargs
+    #-def
+#-class
+
 class Action(object):
     """
     """
@@ -47,6 +64,10 @@ class Action(object):
         """
         """
 
-        context.do_action(self)
+        library = context.handler.dispatcher.template.library
+        command = library.get_command(self.name)
+        if command is None:
+            raise CommandNotFoundError(self.name)
+        command(self, context)
     #-def
 #-class
