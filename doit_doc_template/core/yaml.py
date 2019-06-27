@@ -90,24 +90,24 @@ class YamlObject(object):
     #-def
 #-class
 
-class YamlBool(bool, YamlObject):
+class YamlBool(YamlObject):
     """
     """
-    __slots__ = []
+    __slots__ = ["__value"]
 
-    def __new__(cls, *args, **kwargs):
+    def __init__(self, value):
         """
         """
 
-        return super(YamlBool, cls).__new__(cls, *args, **kwargs)
+        YamlObject.__init__(self)
+        self.__value = value
     #-def
 
-    def __init__(self, *args, **kwargs):
+    def __bool__(self):
         """
         """
 
-        bool.__init__(self)
-        YamlObject.__init__(self)
+        return self.__value
     #-def
 #-class
 
