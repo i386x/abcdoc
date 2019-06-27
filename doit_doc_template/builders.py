@@ -45,10 +45,10 @@ from .core.keywords import KW_VARIABLES
 from .core.utils import get_config_value, Importer
 from .writers import DoItHtmlTranslator, DoItHtmlWriter
 
-logger = logging.getLoger(__name__)
+logger = logging.getLogger(__name__)
 
 builtin_templates_dir = os.path.join(
-    os.path.dirname(os.path.realpath(__file)), "templates"
+    os.path.dirname(os.path.realpath(__file__)), "templates"
 )
 
 class DoItHtmlBuilder(Builder):
