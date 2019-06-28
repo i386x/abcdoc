@@ -199,7 +199,7 @@ class KeyValidatorHelper(object):
         """
         """
 
-        check_subset(args, self.valid_keys, self.__invalid_key)
+        check_subset(args, self.kvobj.valid_keys, self.__invalid_key)
         if len(intersect(self.keylist, self.kvobj.data)) == 0:
             return
         keys = self.keylist + args
@@ -211,7 +211,7 @@ class KeyValidatorHelper(object):
         """
 
         raise InternalError(
-            __file__, caller_name(1, self.__class__),
+            __file__, caller_name(2, self.__class__),
             "key '{}' is not a valid key of 'kvobj.data'".format(key)
         )
     #-def
