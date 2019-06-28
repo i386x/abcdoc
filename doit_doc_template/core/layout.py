@@ -118,7 +118,7 @@ class LayoutSet(object):
         if KW_FROM in layout:
             layout_file = get_and_check(layout, KW_FROM, value_type=str)
             return LayoutFromFile(name, params, layout_file)
-        layoutstring = get_and_check(layout, KW_LAYOUT, value_type=str)
+        layout_string = get_and_check(layout, KW_LAYOUT, value_type=str)
         return LayoutFromString(name, params, layout_string)
     #-def
 #-class
