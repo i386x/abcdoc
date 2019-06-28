@@ -76,7 +76,7 @@ class Library(object):
         """
         """
 
-        with Importer(path, False):
+        with Importer([path], False):
             module = __import__(name, None, None, ["load"])
             if hasattr(module, "load"):
                 self.library.update(module.load(self))
