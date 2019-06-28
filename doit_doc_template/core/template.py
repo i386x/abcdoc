@@ -101,6 +101,7 @@ class Template(object):
         )
         self.library.load(templatedir, "library")
         self.builder.template_stack.pop()
+        return self
     #-def
 
     def load_config(self, templatedir):
