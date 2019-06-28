@@ -80,9 +80,11 @@ class Context(object):
             leaves = set()
             for v in vardeps:
                 if not vardeps[v]:
-                    value = Template(self.variables[v]).render(context)
+                    value = self.variables[v]
+                    if isinstance(value, str):
+                        value = Template(value).render(context)
+                        self.variables[v] = value
                     context[v] = value
-                    self.variables[v] = value
                     leaves.add(v)
             if not leaves:
                 raise CyclicDependencyError(self.template, "variables")
