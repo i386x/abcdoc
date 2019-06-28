@@ -146,8 +146,8 @@ class Dispatcher(object):
         """
 
         if not name.startswith("visit_") \
-        or not name.startswith("depart_") \
-        or not name.endswith("_hook"):
+        and not name.startswith("depart_") \
+        and not name.endswith("_hook"):
             invalid_data(data, "invalid handler name '{}'".format(name))
         return cls.compile_handler_body(get_and_check(data, name, [], list))
     #-def
