@@ -30,4 +30,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-def load():
+import os
+
+from doit_doc_template.core.template import Template
+
+templatedir = os.path.dirname(os.path.realpath(__file__))
+
+def load(builder):
+    """
+    """
+
+    return Template(builder).load(templatedir)
+#-def
