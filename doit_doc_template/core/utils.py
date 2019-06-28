@@ -116,7 +116,7 @@ def read_utf8_file(filename):
 
     try:
         with open(filename, "r", encoding="utf-8") as f:
-            return f.readall()
+            return f.read()
     except OSError:
         pass
     return None
@@ -128,7 +128,7 @@ def read_yaml_file(filename):
 
     content = read_utf8_file(filename)
     if content is None:
-        raise ReadFileError(filename)
+        return None
     try:
         return load(content, YamlLoader)
     except YAMLError as error:
