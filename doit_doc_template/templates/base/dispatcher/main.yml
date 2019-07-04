@@ -8,6 +8,12 @@
 #! \brief   Base template dispatcher definition.
 #
 
+start_page_hook:
+  - newpage: page
+
+end_page_hook:
+  - output: "{{ page | beautify }}"
+
 visit_substitution_definition:
   - skip
 
@@ -15,20 +21,23 @@ depart_substitution_definition:
   - pass
 
 visit_document:
-  - pass
+  - pushmark: page
 
 depart_document:
-  - pass
+  - popmark: page
 
 visit_emphasis:
-  - pass
+  - pushmark: page
 
 depart_emphasis:
+  - popmark: page
   - render:
-      emphasize: "{{ node }}"
+      emphasize: _0
+  - contribute: page
 
 visit_text:
   - pass
 
 depart_text:
-  - html_escape: "{{ node.text }}"
+  - _0: "{{ node.astext() | e }}"
+  - contribute: page
