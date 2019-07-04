@@ -32,18 +32,20 @@ IN THE SOFTWARE.\
 
 import os
 
+from jinja2 import TemplateError
 from sphinx.errors import ExtensionError
 
 class InternalError(ExtensionError):
     """
     """
+    message = "[INTERNAL ERROR] <{}>::{}: {}."
     __slots__ = []
 
     def __init__(self, filename, location, detail):
         """
         """
 
-        ExtensionError.__init__(self, "[INTERNAL ERROR] <{}>::{}: {}.".format(
+        ExtensionError.__init__(self, message.format(
             os.path.realpath(filename), location, detail
         ))
     #-def
@@ -52,28 +54,28 @@ class InternalError(ExtensionError):
 class ReadFileError(ExtensionError):
     """
     """
+    message = "The content of <{}> cannot be read."
     __slots__ = []
 
     def __init__(self, filename):
         """
         """
 
-        ExtensionError.__init__(
-            self, "The content of <{}> cannot be read.".format(filename)
-        )
+        ExtensionError.__init__(self, message.format(filename))
     #-def
 #-class
 
 class YamlError(ExtensionError):
     """
     """
+    message = "Error {}"
     __slots__ = []
 
     def __init__(self, error):
         """
         """
 
-        ExtensionError.__init__(self, "Error {}".format(str(error)))
+        ExtensionError.__init__(self, message.format(str(error)))
     #-def
 #-class
 
@@ -93,17 +95,16 @@ class YamlDataFormatError(YamlError):
 class CyclicDependencyError(ExtensionError):
     """
     """
+    message = "In {} template {}: cyclic dependencies detected."
     __slots__ = []
 
     def __init__(self, template, where):
         """
         """
 
-        ExtensionError.__init__(
-            self, "In {} template {}: cyclic dependencies detected.".format(
-                template.locals["_templatedir"], where
-            )
-        )
+        ExtensionError.__init__(self, message.format(
+            template.locals["_templatedir"], where
+        ))
     #-def
 #-class
 
@@ -123,19 +124,21 @@ class DispatcherError(ExtensionError):
 class UnhandledEventError(DispatcherError):
     """
     """
+    message = "Unhandled event '{}'."
     __slots__ = []
 
     def __init__(self, event):
         """
         """
 
-        DispatcherError.__init__(self, "Unhandled event '{}'.".format(event))
+        DispatcherError.__init__(self, message.format(event))
     #-def
 #-class
 
-class CommandNotFoundError(ExtensionError):
+class ComponentNotFoundError(ExtensionError):
     """
     """
+    message = "In <{}>, line {}, column {}: Component '{}' is not defined."
     __slots__ = []
 
     def __init__(self, name):
@@ -143,10 +146,62 @@ class CommandNotFoundError(ExtensionError):
         """
 
         mark = name.mark
-        ExtensionError.__init__(
-            self, "In <{}>, line {}, column {}: Unknown command: {}.".format(
-                mark.name, mark.line + 1, mark.column + 1, name
-            )
-        )
+        ExtensionError.__init__(self, message.format(
+            mark.name, mark.line + 1, mark.column + 1, name
+        ))
+    #-def
+#-class
+
+class CommandNotFoundError(ExtensionError):
+    """
+    """
+    message = "In <{}>, line {}, column {}: Unknown command: {}."
+    __slots__ = []
+
+    def __init__(self, name):
+        """
+        """
+
+        mark = name.mark
+        ExtensionError.__init__(self, message.format(
+            mark.name, mark.line + 1, mark.column + 1, name
+        ))
+    #-def
+#-class
+
+class TypeNotFoundError(ExtensionError):
+    """
+    """
+    message = "In <{}>, line {}, column {}: Unknown type: {}."
+    __slots__ = []
+
+    def __init__(self, name):
+        """
+        """
+
+        mark = name.mark
+        ExtensionError.__init__(self, message.format(
+            mark.name, mark.line + 1, mark.column + 1, name
+        ))
+    #-def
+#-class
+
+class ArgumentCountError(TemplateError):
+    """
+    """
+    message = "{}: {}.".format(
+        "In {} defined in <{}>, line {}, column {}",
+        "Expected {} arguments, given {}"
+    )
+    __slots__ = []
+
+    def __init__(self, name, nexpected, ngiven):
+        """
+        """
+
+        mark = name.mark
+        TemplateError.__init__(self, message.format(
+            name, mark.name, mark.line + 1, mark.column + 1, nexpected, ngiven
+        ))
     #-def
 #-class

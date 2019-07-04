@@ -134,10 +134,11 @@ class Template(object):
         visited.append(self)
         for base in self.bases:
             base.setup(visited)
-        self.context.resolve_variables()
-        self.context.deploy_variables(force=True)
+        self.context.setup()
         self.dispatcher.setup()
+        self.components.setup()
         self.library.setup()
+        self.context.post_setup()
         return self
     #-def
 #-class

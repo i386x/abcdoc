@@ -30,7 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from jinja2 import Template
+from jinja2 import Environment, Template
 
 from .errors import CyclicDependencyError
 from .keywords import CONTEXT_KEYS, KW_VARIABLES
@@ -40,7 +40,7 @@ from .validators import expect_type, get_and_check, valid_keys
 class Context(object):
     """
     """
-    __slots__ = ["template", "variables"]
+    __slots__ = ["template", "variables", "j2context", "j2env"]
 
     def __init__(self, template):
         """
@@ -48,6 +48,8 @@ class Context(object):
 
         self.template = template
         self.variables = {}
+        self.j2context = {}
+        self.j2env = Environment(autoescape=False, cache_size=-1)
     #-def
 
     def load_from_file(self, filename):
@@ -112,5 +114,22 @@ class Context(object):
         variables = context.get(KW_VARIABLES)
         for var in self.variables:
             ensure_key(variables, var, self.variables[var], force)
+    #-def
+
+    def setup(self):
+        """
+        """
+
+        self.resolve_variables()
+        self.deploy_variables(force=True)
+    #-def
+
+    def post_setup(self):
+        """
+        """
+
+        self.j2context.update(self.template.builder.context[KW_VARIABLES])
+        self.j2context.update(self.template.locals)
+        self.j2env.filters.update(self.template.library.filters)
     #-def
 #-class

@@ -30,19 +30,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
+from .keywords import \
+    PRE_CMD, PRE_CMD_LEN, PRE_FILTER, PRE_FILTER_LEN, PRE_TYPE, PRE_TYPE_LEN
 from .utils import Importer
 
 class Library(object):
     """
     """
-    __slots__ = ["template", "library", "rbases"]
+    __slots__ = ["template", "commands", "filters", "types", "rbases"]
 
     def __init__(self, template):
         """
         """
 
         self.template = template
-        self.library = {}
+        self.commands = {}
+        self.filters = {}
+        self.types = {}
         self.rbases = []
     #-def
 
@@ -50,8 +54,14 @@ class Library(object):
         """
         """
 
-        self.rbases.extend(self.template.bases)
+        bases = self.template.bases
+        self.rbases.extend(bases)
         self.rbases.reverse()
+        filters = {}
+        for base in bases:
+            filters.update(base.filters)
+        filters.update(self.filters)
+        self.filters = filters
     #-def
 
     def get_command(self, name, visited=None):
@@ -63,12 +73,30 @@ class Library(object):
         if self in visited:
             return None
         visited.append(self)
-        if name in self.library:
-            return self.library[name]
+        if name in self.commands:
+            return self.commands[name]
         for base in self.rbases:
             command = base.library.get_command(name, visited)
             if command:
                 return command
+        return None
+    #-def
+
+    def get_type(self, name, visited=None):
+        """
+        """
+
+        if visited is None:
+            visited = []
+        if self in visited:
+            return None
+        visited.append(self)
+        if name in self.types:
+            return self.types[name]
+        for base in self.rbases:
+            typ = base.library.get_type(name, visited)
+            if typ:
+                return typ
         return None
     #-def
 
@@ -79,6 +107,13 @@ class Library(object):
         with Importer([path], False):
             module = __import__(name, None, None, ["load"])
             if hasattr(module, "load"):
-                self.library.update(module.load(self))
+                library = module.load(self)
+                for k in library:
+                    if k.startswith(PRE_CMD):
+                        self.commands[k[PRE_CMD_LEN:]] = library[k]
+                    elif k.startswith(PRE_FILTER):
+                        self.filters[k[PRE_FILTER_LEN:]] = library[k]
+                    elif k.startswith(PRE_TYPE):
+                        self.types[k[PRE_TYPE_LEN:]] = library[k]
     #-def
 #-class

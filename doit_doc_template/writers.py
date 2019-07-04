@@ -33,6 +33,8 @@ IN THE SOFTWARE.\
 from docutils.nodes import NodeVisitor
 from docutils.writers.html4css1 import Writer
 
+from .core.keywords import KW_OUTPUT
+
 class DoItHtmlWriter(Writer):
     """
     """
@@ -61,7 +63,7 @@ class DoItHtmlWriter(Writer):
 class DoItHtmlTranslator(NodeVisitor):
     """
     """
-    __slots__ = ["builder", "dispatcher", "output"]
+    __slots__ = ["builder", "dispatcher", "context"]
 
     def __init__(self, builder, *args, **kwargs):
         """
@@ -70,7 +72,7 @@ class DoItHtmlTranslator(NodeVisitor):
         NodeVisitor.__init__(self, *args, **kwargs)
         self.builder = builder
         self.dispatcher = self.builder.template.dispatcher
-        self.output = ""
+        self.context = {}
     #-def
 
     def unknown_visit(self, node):
@@ -91,6 +93,6 @@ class DoItHtmlTranslator(NodeVisitor):
         """
         """
 
-        return self.output
+        return self.context.get(KW_OUTPUT, "")
     #-def
 #-class

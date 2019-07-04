@@ -47,6 +47,16 @@ def intersect(set_a, set_b):
     return [x for x in set_a if x in set_b]
 #-def
 
+def dictmerge(*dicts):
+    """
+    """
+
+    result = {}
+    for d in dicts:
+        result.update(d)
+    return result
+#-def
+
 def ensure_key(dictionary, key, value, always_overwrite=False):
     """
     """

@@ -31,19 +31,52 @@ IN THE SOFTWARE.\
 """
 
 from .errors import CommandNotFoundError
+from .utils import dictmerge
 
 class ActionContext(object):
     """
     """
-    __slots__ = ["handler", "args", "kwargs"]
+    __slots__ = ["handler", "template", "kwargs", "variables"]
 
-    def __init__(self, handler, args, kwargs):
+    def __init__(self, handler, template, kwargs):
         """
         """
 
         self.handler = handler
-        self.args = args
+        self.template = template
         self.kwargs = kwargs
+        self.variables = {}
+    #-def
+
+    def getvar(self, name, default=None):
+        """
+        """
+
+        return self.variables.get(name, default)
+    #-def
+
+    def setvar(self, name, value):
+        """
+        """
+
+        self.variables[name] = value
+    #-def
+
+    def evaluate_args(self, args):
+        """
+        """
+
+        tctx = self.template.context
+        j2env = tctx.j2env
+        j2context = tctx.j2context
+        trcontext = self.template.builder.docwriter.visitor.context
+        ctx = dictmerge(j2context, self.kwargs, trcontext)
+        f = lambda x: (
+            self.variables.get(x) if x in self.variables else (
+                j2env.from_string(x).render(ctx) if isinstance(x, str) else x
+            )
+        )
+        return [f(x) for x in args]
     #-def
 #-class
 

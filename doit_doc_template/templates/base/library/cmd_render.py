@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/core/keywords.py
+#! \file    ~/doit_doc_template/templates/base/library/cmd_render.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-05-18 12:06:12 +0200
+#! \stamp   2019-06-29 23:19:44 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-String constants.\
+render command.\
 """
 
 __license__ = """\
@@ -30,31 +30,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-KW_ACTION = "action"
-KW_ARE_REQUIRED = "are_required"
-KW_ARGS = "args"
-KW_BASES = "bases"
-KW_DEPENDENCIES = "dependencies"
-KW_FROM = "from"
-KW_IS_REQUIRED = "is_required"
-KW_JUST_ONE_IS_REQUIRED = "just_one_is_required"
-KW_LAYOUT = "layout"
-KW_NAME = "name"
-KW_OUTPUT = "output"
-KW_PARAMETERS = "parameters"
-KW_RENDER = "render"
-KW_VARIABLES = "variables"
-KW__0 = "_0"
+from doit_doc_template.core.errors import ComponentNotFoundError
+from doit_doc_template.core.keywords import KW__0
 
-PRE_CMD = "cmd_"
-PRE_CMD_LEN = len(PRE_CMD)
-PRE_FILTER = "filter_"
-PRE_FILTER_LEN = len(PRE_FILTER)
-PRE_TYPE = "type_"
-PRE_TYPE_LEN = len(PRE_TYPE)
+def parse_args(args):
+    """
+    """
 
-ACTION_KEYS = (KW_ACTION, KW_ARGS)
-COMPONENT_KEYS = (KW_DEPENDENCIES, KW_FROM, KW_NAME, KW_PARAMETERS, KW_RENDER)
-CONFIG_KEYS = (KW_BASES,)
-CONTEXT_KEYS = (KW_VARIABLES,)
-LAYOUT_KEYS = (KW_FROM, KW_LAYOUT, KW_NAME, KW_PARAMETERS)
+    name = list(args)[0]
+    params = args[name]
+    if isinstance(params, str):
+        params = params.wrap([params])
+    return name, params
+#-def
+
+def cmd_render(action, context):
+    """
+    """
+
+    name, args = parse_args(action.args)
+    template = context.template
+    renderer = template.components.get_wrapper(name)
+    if renderer is None:
+        raise ComponentNotFoundError(name)
+    args = context.evaluate_args(args)
+    context.setvar(KW__0, renderer(*args))
+#-def

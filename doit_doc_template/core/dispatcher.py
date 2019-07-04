@@ -51,11 +51,11 @@ class Handler(object):
         self.actions = actions
     #-def
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, template, **kwargs):
         """
         """
 
-        context = ActionContext(self, args, kwargs)
+        context = ActionContext(self, template, kwargs)
         for action in self.actions:
             action(context)
     #-def
@@ -101,14 +101,14 @@ class Dispatcher(object):
         return None
     #-def
 
-    def handle(self, name, *args, **kwargs):
+    def handle(self, name, **kwargs):
         """
         """
 
         handler = self.get_handler(name)
         if handler is None:
             raise UnhandledEventError(name)
-        handler(self.template, *args, **kwargs)
+        handler(self.template, **kwargs)
     #-def
 
     def visit(self, translator, node):
