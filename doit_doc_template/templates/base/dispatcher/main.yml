@@ -8,11 +8,19 @@
 #! \brief   Base template dispatcher definition.
 #
 
+# =============================================================================
+# == Hooks
+# =============================================================================
+
 start_page_hook:
   - newpage: page
 
 end_page_hook:
   - output: "{{ page | beautify }}"
+
+# =============================================================================
+# == Meta Nodes
+# =============================================================================
 
 visit_substitution_definition:
   - skip
@@ -20,11 +28,36 @@ visit_substitution_definition:
 depart_substitution_definition:
   - pass
 
+visit_target:
+  - pass
+
+depart_target:
+  - pushlabel: page
+  - adduri: page
+
+# =============================================================================
+# == Document Nodes
+# =============================================================================
+
 visit_document:
   - pushmark: page
 
 depart_document:
   - popmark: page
+
+visit_section:
+  - pushmark: page
+
+depart_section:
+  - popmark: page
+  - debug: _0
+
+visit_title:
+  - pushmark: page
+
+depart_title:
+  - popmark: page
+  - debug: _0
 
 visit_emphasis:
   - pushmark: page
@@ -35,9 +68,14 @@ depart_emphasis:
       emphasize: _0
   - contribute: page
 
-visit_text:
+# =============================================================================
+# == Document Leaves
+# =============================================================================
+
+visit_Text:
   - pass
 
-depart_text:
+depart_Text:
+  - debug: x
   - _0: "{{ node.astext() | e }}"
   - contribute: page

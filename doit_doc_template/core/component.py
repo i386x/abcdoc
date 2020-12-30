@@ -117,7 +117,7 @@ class ComponentSet(object):
         if name in self.components:
             return self.components[name]
         for base in self.rbases:
-            component = base.get_component(name, visited)
+            component = base.components.get_component(name, visited)
             if component:
                 return component
         return None
@@ -204,7 +204,7 @@ class ComponentSet(object):
             i = 0
             while i < nargs:
                 p, t = params[i]
-                pvars[p] = t(args[i])
+                pvars[p] = t(p, args[i])
                 i += 1
             return pvars
         return paramspec
@@ -219,12 +219,11 @@ class ComponentSet(object):
             return
         expect_type(data, list)
         for c in data:
-            component = ComponentSet.compile_component(c)
+            component = self.compile_component(c)
             self.components[component.name] = component
     #-def
 
-    @classmethod
-    def compile_component(cls, component):
+    def compile_component(self, component):
         """
         """
 

@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/core/keywords.py
+#! \file    ~/doit_doc_template/templates/base/library/cmd_adduri.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-05-18 12:06:12 +0200
+#! \stamp   2019-07-21 14:48:48 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-String constants.\
+adduri command.\
 """
 
 __license__ = """\
@@ -30,31 +30,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-KW_ACTION = "action"
-KW_ARE_REQUIRED = "are_required"
-KW_ARGS = "args"
-KW_BASES = "bases"
-KW_DEPENDENCIES = "dependencies"
-KW_END_PAGE = "end_page"
-KW_FROM = "from"
-KW_IS_REQUIRED = "is_required"
-KW_JUST_ONE_IS_REQUIRED = "just_one_is_required"
-KW_LAYOUT = "layout"
-KW_NAME = "name"
-KW_NAMES = "names"
-KW_NODE = "node"
-KW_OUTPUT = "output"
-KW_PARAMETERS = "parameters"
-KW_REFID = "refid"
-KW_REFURI = "refuri"
-KW_RENDER = "render"
-KW_START_PAGE = "start_page"
-KW_TRANSLATOR = "translator"
-KW_VARIABLES = "variables"
-KW__0 = "_0"
+from doit_doc_template.core.action import get_str
+from doit_doc_template.core.errors import BadArgsError
+from doit_doc_template.core.keywords import \
+    KW_NAMES, KW_NODE, KW_REFURI, KW_TRANSLATOR
 
-ACTION_KEYS = (KW_ACTION, KW_ARGS)
-COMPONENT_KEYS = (KW_DEPENDENCIES, KW_FROM, KW_NAME, KW_PARAMETERS, KW_RENDER)
-CONFIG_KEYS = (KW_BASES,)
-CONTEXT_KEYS = (KW_VARIABLES,)
-LAYOUT_KEYS = (KW_FROM, KW_LAYOUT, KW_NAME, KW_PARAMETERS)
+from .type_page import Page
+
+def cmd_adduri(action, context):
+    """
+    """
+
+    varname = get_str(action, context, "Variable name is expected")
+    page = context.kwargs[KW_TRANSLATOR].context.get(varname)
+    if page is None:
+        raise BadArgsError(varname, "{} is undefined".format(varname))
+    if not isinstance(page, Page):
+        raise BadArgsError(varname, "{} is not a page".format(varname))
+    node = context.kwargs[KW_NODE]
+    if KW_REFURI not in node.attributes:
+        return
+    names = node.attributes.get(KW_NAMES, [])
+    uri = node.attributes[KW_REFURI]
+    for name in names:
+        page.adduri(name, uri)
+#-def

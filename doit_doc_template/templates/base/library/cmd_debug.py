@@ -1,14 +1,14 @@
 #                                                         -*- coding: utf-8 -*-
-#! \file    ~/doit_doc_template/core/keywords.py
+#! \file    ~/doit_doc_template/templates/base/library/cmd_debug.py
 #! \author  Jiří Kučera, <sanczes AT gmail.com>
-#! \stamp   2019-05-18 12:06:12 +0200
+#! \stamp   2019-07-20 19:26:34 +0200
 #! \project DoIt! Doc: Sphinx Extension for DoIt! Documentation
 #! \license MIT
 #! \version See doit_doc_template.__version__
 #! \brief   See __doc__
 #
 """\
-String constants.\
+debug command.\
 """
 
 __license__ = """\
@@ -30,31 +30,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-KW_ACTION = "action"
-KW_ARE_REQUIRED = "are_required"
-KW_ARGS = "args"
-KW_BASES = "bases"
-KW_DEPENDENCIES = "dependencies"
-KW_END_PAGE = "end_page"
-KW_FROM = "from"
-KW_IS_REQUIRED = "is_required"
-KW_JUST_ONE_IS_REQUIRED = "just_one_is_required"
-KW_LAYOUT = "layout"
-KW_NAME = "name"
-KW_NAMES = "names"
-KW_NODE = "node"
-KW_OUTPUT = "output"
-KW_PARAMETERS = "parameters"
-KW_REFID = "refid"
-KW_REFURI = "refuri"
-KW_RENDER = "render"
-KW_START_PAGE = "start_page"
-KW_TRANSLATOR = "translator"
-KW_VARIABLES = "variables"
-KW__0 = "_0"
+from sphinx.util import logging
 
-ACTION_KEYS = (KW_ACTION, KW_ARGS)
-COMPONENT_KEYS = (KW_DEPENDENCIES, KW_FROM, KW_NAME, KW_PARAMETERS, KW_RENDER)
-CONFIG_KEYS = (KW_BASES,)
-CONTEXT_KEYS = (KW_VARIABLES,)
-LAYOUT_KEYS = (KW_FROM, KW_LAYOUT, KW_NAME, KW_PARAMETERS)
+from doit_doc_template.core.keywords import KW_NODE
+
+logger = logging.getLogger(__name__)
+
+def p(msg, *args):
+    """
+    """
+
+    logger.info(msg.format(*args), color="blue")
+#-def
+
+def show_node(node):
+    """
+    """
+
+    p("======== Showing node {} ========", repr(node))
+    for attrname in dir(node):
+        attr = getattr(node, attrname)
+        if not hasattr(attr, "__call__"):
+            p("- {}: {}", attrname, repr(attr))
+    p("======== Edn of node {} =========", repr(node))
+#-def
+
+def cmd_debug(action, context):
+    """
+    """
+
+    show_node(context.kwargs.get(KW_NODE))
+    p("Flattened args: {}", repr(context.evaluate_args(action.flatten_args())))
+#-def

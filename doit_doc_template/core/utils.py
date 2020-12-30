@@ -35,10 +35,10 @@ import os
 import sys
 
 from jinja2 import Environment, meta
-from yaml import load, MarkedYAMLError, YAMLError
+from yaml import MarkedYAMLError, YAMLError
 
 from .errors import ReadFileError, YamlError
-from .yaml import YamlLoader
+from .yaml import load, YamlLoader
 
 def intersect(set_a, set_b):
     """
@@ -97,6 +97,13 @@ def typename_from_data(data):
     return typename_from_type(type(data))
 #-def
 
+def simplerep(obj):
+    """
+    """
+
+    return "{}(...)".format(obj.__class__.__name__)
+#-def
+
 def add_filename_to_yaml_error(error, filename):
     """
     """
@@ -140,7 +147,7 @@ def read_yaml_file(filename):
     if content is None:
         return None
     try:
-        return load(content, YamlLoader)
+        return load(content, YamlLoader, filename=filename)
     except YAMLError as error:
         add_filename_to_yaml_error(error, filename)
         raise YamlError(error)

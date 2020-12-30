@@ -30,8 +30,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from .errors import CommandNotFoundError
+from .errors import BadArgsError, CommandNotFoundError
+from .keywords import KW__0
 from .utils import dictmerge
+
+def flatten_args(args):
+    """
+    """
+
+    result = args.wrap([])
+    if isinstance(args, list):
+        for arg in args:
+            result.extend(flatten_args(arg))
+    elif isinstance(args, dict):
+        if len(args) != 1:
+            raise BadArgsError(args, "Only dict of size 1 is allowed")
+        key = list(args)[0]
+        value = args[key]
+        result.extend(flatten_args(key))
+        result.extend(flatten_args(value))
+    else:
+        result.append(args)
+    return result
+#-def
+
+def get_str(action, context, errmsg):
+    """
+    """
+
+    args = context.evaluate_args(action.flatten_args())
+    if len(args) != 1 or not isinstance(args[0], str):
+        raise BadArgsError(args, errmsg)
+    return args[0]
+#-def
+
+def get_cmd_and_args(action, context, errmsg):
+    """
+    """
+
+    args = context.evaluate_args(action.flatten_args())
+    if len(args) == 0:
+        raise BadArgsError(args, errmsg)
+    cmd = args.pop(0)
+    if not isinstance(cmd, str):
+        raise BadArgsError(cmd, "Expected string")
+    if args:
+        args = args[0].wrap(args)
+    return cmd, args
+#-def
 
 class ActionContext(object):
     """
@@ -46,6 +92,14 @@ class ActionContext(object):
         self.template = template
         self.kwargs = kwargs
         self.variables = {}
+        self.init_variables()
+    #-def
+
+    def init_variables(self):
+        """
+        """
+
+        self.setvar(KW__0, "")
     #-def
 
     def getvar(self, name, default=None):
@@ -76,7 +130,7 @@ class ActionContext(object):
                 j2env.from_string(x).render(ctx) if isinstance(x, str) else x
             )
         )
-        return [f(x) for x in args]
+        return args.wrap([x.wrap(f(x)) for x in args])
     #-def
 #-class
 
@@ -91,6 +145,15 @@ class Action(object):
 
         self.name = name
         self.args = args
+    #-def
+
+    def flatten_args(self):
+        """
+        """
+
+        if self.args is None:
+            return self.name.wrap([])
+        return flatten_args(self.args)
     #-def
 
     def __call__(self, context):

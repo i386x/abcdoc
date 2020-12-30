@@ -29,3 +29,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
+
+from .cmd_adduri import cmd_adduri
+from .cmd_debug import cmd_debug
+from .cmd_newpage import cmd_newpage
+from .cmd_pass import cmd_pass
+from .cmd_popmark import cmd_popmark
+from .cmd_pushlabel import cmd_pushlabel
+from .cmd_pushmark import cmd_pushmark
+from .cmd_render import cmd_render
+from .cmd_skip import cmd_skip
+from .type_page import type_page
+
+def load(library):
+    """
+    """
+
+    library.commands["adduri"] = cmd_adduri
+    library.commands["debug"] = cmd_debug
+    library.commands["newpage"] = cmd_newpage
+    library.commands["pass"] = cmd_pass
+    library.commands["popmark"] = cmd_popmark
+    library.commands["pushlabel"] = cmd_pushlabel
+    library.commands["pushmark"] = cmd_pushmark
+    library.commands["render"] = cmd_render
+    library.commands["skip"] = cmd_skip
+    library.types["page"] = type_page
+#-def

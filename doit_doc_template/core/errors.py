@@ -45,7 +45,7 @@ class InternalError(ExtensionError):
         """
         """
 
-        ExtensionError.__init__(self, message.format(
+        ExtensionError.__init__(self, self.message.format(
             os.path.realpath(filename), location, detail
         ))
     #-def
@@ -61,7 +61,7 @@ class ReadFileError(ExtensionError):
         """
         """
 
-        ExtensionError.__init__(self, message.format(filename))
+        ExtensionError.__init__(self, self.message.format(filename))
     #-def
 #-class
 
@@ -75,7 +75,7 @@ class YamlError(ExtensionError):
         """
         """
 
-        ExtensionError.__init__(self, message.format(str(error)))
+        ExtensionError.__init__(self, self.message.format(str(error)))
     #-def
 #-class
 
@@ -102,7 +102,7 @@ class CyclicDependencyError(ExtensionError):
         """
         """
 
-        ExtensionError.__init__(self, message.format(
+        ExtensionError.__init__(self, self.message.format(
             template.locals["_templatedir"], where
         ))
     #-def
@@ -131,7 +131,7 @@ class UnhandledEventError(DispatcherError):
         """
         """
 
-        DispatcherError.__init__(self, message.format(event))
+        DispatcherError.__init__(self, self.message.format(event))
     #-def
 #-class
 
@@ -146,7 +146,7 @@ class ComponentNotFoundError(ExtensionError):
         """
 
         mark = name.mark
-        ExtensionError.__init__(self, message.format(
+        ExtensionError.__init__(self, self.message.format(
             mark.name, mark.line + 1, mark.column + 1, name
         ))
     #-def
@@ -163,7 +163,7 @@ class CommandNotFoundError(ExtensionError):
         """
 
         mark = name.mark
-        ExtensionError.__init__(self, message.format(
+        ExtensionError.__init__(self, self.message.format(
             mark.name, mark.line + 1, mark.column + 1, name
         ))
     #-def
@@ -180,8 +180,46 @@ class TypeNotFoundError(ExtensionError):
         """
 
         mark = name.mark
-        ExtensionError.__init__(self, message.format(
+        ExtensionError.__init__(self, self.message.format(
             mark.name, mark.line + 1, mark.column + 1, name
+        ))
+    #-def
+#-class
+
+class BadArgsError(ExtensionError):
+    """
+    """
+    message = "In <{}>, line {}, column {}: {}."
+    __slots__ = []
+
+    def __init__(self, yamlobj, detail):
+        """
+        """
+
+        mark = yamlobj.mark
+        ExtensionError.__init__(self, self.message.format(
+            mark.name, mark.line + 1, mark.column + 1, detail
+        ))
+    #-def
+#-class
+
+class BadTypeError(ExtensionError):
+    """
+    """
+    message = " ".join([
+        "In <{}>, line {}, column {}:",
+        "Parameter '{}' should be of a type {} but it is of a type {} instead."
+    ])
+    __slots__ = []
+
+    def __init__(self, param, obj, objtype):
+        """
+        """
+
+        mark = param.mark
+        ExtensionError.__init__(self, self.message.format(
+            mark.name, mark.line + 1, mark.column + 1, param,
+            obj.__type__.__name__, objtype.__name__
         ))
     #-def
 #-class
@@ -200,7 +238,7 @@ class ArgumentCountError(TemplateError):
         """
 
         mark = name.mark
-        TemplateError.__init__(self, message.format(
+        TemplateError.__init__(self, self.message.format(
             name, mark.name, mark.line + 1, mark.column + 1, nexpected, ngiven
         ))
     #-def

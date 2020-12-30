@@ -127,6 +127,13 @@ class Dispatcher(object):
         self.handle(name, translator=translator, node=node)
     #-def
 
+    def send(self, event, **kwargs):
+        """
+        """
+
+        self.handle("{}_hook".format(event), **kwargs)
+    #-def
+
     def load_from_file(self, filename):
         """
         """

@@ -33,7 +33,7 @@ IN THE SOFTWARE.\
 from docutils.nodes import NodeVisitor
 from docutils.writers.html4css1 import Writer
 
-from .core.keywords import KW_OUTPUT
+from .core.keywords import KW_END_PAGE, KW_OUTPUT, KW_START_PAGE
 
 class DoItHtmlWriter(Writer):
     """
@@ -55,8 +55,10 @@ class DoItHtmlWriter(Writer):
         self.visitor = visitor = self.builder.create_translator(
             self.builder, self.document
         )
+        visitor.start_page()
         self.document.walkabout(visitor)
-        self.output = self.visitor.astext()
+        visitor.end_page()
+        self.output = visitor.astext()
     #-def
 #-class
 
@@ -73,6 +75,20 @@ class DoItHtmlTranslator(NodeVisitor):
         self.builder = builder
         self.dispatcher = self.builder.template.dispatcher
         self.context = {}
+    #-def
+
+    def start_page(self):
+        """
+        """
+
+        self.dispatcher.send(KW_START_PAGE, translator=self)
+    #-def
+
+    def end_page(self):
+        """
+        """
+
+        self.dispatcher.send(KW_END_PAGE, translator=self)
     #-def
 
     def unknown_visit(self, node):

@@ -30,8 +30,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
-from .keywords import \
-    PRE_CMD, PRE_CMD_LEN, PRE_FILTER, PRE_FILTER_LEN, PRE_TYPE, PRE_TYPE_LEN
 from .utils import Importer
 
 class Library(object):
@@ -59,7 +57,7 @@ class Library(object):
         self.rbases.reverse()
         filters = {}
         for base in bases:
-            filters.update(base.filters)
+            filters.update(base.library.filters)
         filters.update(self.filters)
         self.filters = filters
     #-def
@@ -107,13 +105,6 @@ class Library(object):
         with Importer([path], False):
             module = __import__(name, None, None, ["load"])
             if hasattr(module, "load"):
-                library = module.load(self)
-                for k in library:
-                    if k.startswith(PRE_CMD):
-                        self.commands[k[PRE_CMD_LEN:]] = library[k]
-                    elif k.startswith(PRE_FILTER):
-                        self.filters[k[PRE_FILTER_LEN:]] = library[k]
-                    elif k.startswith(PRE_TYPE):
-                        self.types[k[PRE_TYPE_LEN:]] = library[k]
+                module.load(self)
     #-def
 #-class

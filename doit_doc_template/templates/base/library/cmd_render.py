@@ -30,29 +30,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.\
 """
 
+from doit_doc_template.core.action import get_cmd_and_args
 from doit_doc_template.core.errors import ComponentNotFoundError
 from doit_doc_template.core.keywords import KW__0
-
-def parse_args(args):
-    """
-    """
-
-    name = list(args)[0]
-    params = args[name]
-    if isinstance(params, str):
-        params = params.wrap([params])
-    return name, params
-#-def
 
 def cmd_render(action, context):
     """
     """
 
-    name, args = parse_args(action.args)
-    template = context.template
-    renderer = template.components.get_wrapper(name)
+    cmd, args = get_cmd_and_args(action, context, "Renderer name is expected")
+    renderer = context.template.components.get_wrapper(cmd)
     if renderer is None:
-        raise ComponentNotFoundError(name)
-    args = context.evaluate_args(args)
+        raise ComponentNotFoundError(cmd)
     context.setvar(KW__0, renderer(*args))
 #-def

@@ -40,6 +40,17 @@ from yaml.reader import Reader
 from yaml.resolver import Resolver
 from yaml.scanner import Scanner
 
+def load(stream, loadercls, **kwargs):
+    """
+    """
+
+    loader = loadercls(stream, **kwargs)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
+#-def
+
 class YamlObject(object):
     """
     """

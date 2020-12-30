@@ -1,4 +1,4 @@
-.. include defs.inc
+.. include:: defs.inc
 
 .. _doitdoc-installation:
 
