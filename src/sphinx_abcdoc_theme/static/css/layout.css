@@ -1,0 +1,48 @@
+/*
+ * File:    ./src/sphinx_abcdoc_theme/static/css/site.css
+ * Author:  Jiří Kučera <sanczes AT gmail.com>
+ * Date:    2024-11-13 02:06:36 +0100
+ * Project: abcdoc
+ * Brief:   Layout style sheet.
+ * 
+ * SPDX-License-Identifier: MIT
+ */
+
+body {
+  display: flex;
+  flex-direction: row;
+}
+
+body > nav {
+  flex: 0 0 auto;
+  padding-top: var(--navbar-padding-top);
+  width: var(--navbar-width);
+}
+
+body > main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: var(--content-width);
+  padding-left: var(--content-padding-left);
+  padding-right: var(--content-padding-right);
+}
+
+body > main > section {
+  flex: 1 0 auto;
+}
+
+body > main > footer {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  justify-content: space-between;
+  margin-bottom: var(--footer-space-below);
+  margin-top: var(--footer-space-above);
+}
+
+.footer-space-between {
+  margin-left: var(--footer-space-between);
+  margin-right: var(--footer-space-between);
+}

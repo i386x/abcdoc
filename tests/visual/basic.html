@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-language" content="en" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Jiří Kučera" />
+    <meta name="keywords" content="abcdoc, sample" />
+    <meta name="description" content="abcdoc Template Sample" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="../../src/sphinx_abcdoc_theme/static/css/site.css" />
+  </head>
+
+  <body>
+    <nav>
+      <a href="#_vutils-testing">Home</a>
+      <a href="#_installation">Installation</a>
+      <a href="#">User guide</a>
+      <a href="#">Reference</a>
+    </nav>
+
+    <main>
+      <section id="_vutils-testing">
+        <h1>vutils-testing</h1>
+        <p>
+          This package provides a set of tools that help with writing tests. It
+          helps with creating test data and types, mocking objects, patching,
+          and verifying test results.
+        </p>
+        <section>
+          <h2>Table of Contents</h2>
+          <ul>
+            <li>
+              <a href="#_vutils-testing">vutils-testing</a>
+              <ul>
+                <li><a href="#_installation">Installation</a></li>
+              </ul>
+            </li>
+            <li><a href="#">User guide</a></li>
+            <li><a href="#">Reference</a></li>
+          </ul>
+        </section>
+        <section id="_installation">
+          <h2>Installation</h2>
+          <p>
+            To install <code>vutils-testing</code>, type:
+          </p>
+          <pre><code>$ pip install vutils-testing</code></pre>
+          <section id="_installation-sub">
+            <h3>Some subsection</h3>
+            <p>
+              And here we go with some sub-section.
+            </p>
+            <p>
+              Another paragraph of text here. Notice the space between this and
+              previous paragraph.
+            </p>
+            <section id="_installation-sub-par">
+              <h4>Paragraph section</h4>
+              <p>
+                Paragraph section text.
+              </p>
+              <ol>
+                <li>Item</li>
+                <li>Item</li>
+                <li>
+                  Item
+                  <ol>
+                    <li>Item</li>
+                  </ol>
+                </li>
+                <li>Item</li>
+              </ol>
+            </section>
+          </section>
+        </section>
+        <section id="_api">
+          <h2><code class="remove-left-space">vutils.testing.mock</code> module</h2>
+          <dl class="apidoc">
+            <dt><code class="remove-left-space">make_mock()</code></dt>
+            <dd>
+              <p>Make a mockable object.</p>
+              <h4>Signature</h4>
+              <pre class="signature"><code>def make_mock(*args: <a href="#">object</a>, **kwargs: <a href="#">object</a>) -> <a href="#">unittest</a>.<a href="#">mock</a>.<a href="#">Mock</a></code></pre>
+              <h4>Parameters</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="quarter-width">Name</th>
+                    <th class="quarter-width">Type</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code class="literal">*args</code></td>
+                    <td><code class="literal"><a href="#">object</a></code></td>
+                    <td>Positional arguments</td>
+                  </tr>
+                  <tr>
+                    <td><code class="literal">**kwargs</code></td>
+                    <td><code class="literal"><a href="#">object</a></code></td>
+                    <td>Key-value arguments</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h4>Returns</h4>
+              <p>
+                Returns the mock object (<code class="literal"><a href="#">unittest</a>.<a href="#">mock</a>.<a href="#">Mock</a></code>).
+              </p>
+              <h4>Raises</h4>
+              <ul>
+                <li><code class="literal">AssertionError</code> when checks fail</li>
+              </ul>
+              <h4>Description</h4>
+              <p>
+                Some detailed description.
+              </p>
+            </dd>
+          </dl>
+        </section>
+      </section>
+      <footer>
+        <a class="button button-arrow-fix" href="#"><span class="arrow-fix right-spacer">&#x25C0;</span>Previous</a>
+        <div class="small footer-space-between">
+          &#169; Copyright 2021-2024, Jiří Kučera.<br/>
+          Build with <a href="#">Sphinx</a> using the <a href="#">abcdoc</a>
+          theme.
+        </div>
+        <a class="button button-arrow-fix" href="#">Next<span class="arrow-fix left-spacer">&#x25B6;</span></a>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+/*
+ * File:    ./src/sphinx_abcdoc_theme/static/css/content.css
+ * Author:  Jiří Kučera <sanczes AT gmail.com>
+ * Date:    2024-11-14 03:35:39 +0100
+ * Project: abcdoc
+ * Brief:   Content style sheet.
+ * 
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
+ * Common
+ */
+body > main {
+  font-size: var(--text-font-size);
+  line-height: var(--text-line-height);
+  overflow: auto;
+  word-wrap: break-word;
+}
+
+/*
+ * Headings
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--headings-font-family);
+  font-weight: var(--headings-font-weight);
+  line-height: var(--headings-line-height);
+}
+
+body > main h1 {
+  border-bottom-style: solid;
+  border-bottom-width: var(--title-underline-thickness);
+  font-size: var(--title-font-size);
+  margin-bottom: var(--title-space-below);
+  margin-top: var(--title-space-above);
+  padding-bottom: var(--title-underline-skip);
+}
+
+body > main h2 {
+  font-size: var(--section-font-size);
+  margin-bottom: var(--section-space-below);
+  margin-top: var(--section-space-above);
+}
+
+body > main h3 {
+  font-size: var(--subsection-font-size);
+  margin-bottom: var(--subsection-space-below);
+  margin-top: var(--subsection-space-above);
+}
+
+body > main h4,
+body > main h5,
+body > main h6 {
+  font-size: var(--parasection-font-size);
+  margin-bottom: var(--parasection-space-below);
+  margin-top: var(--parasection-space-above);
+}
+
+/*
+ * Paragraphs
+ */
+body > main p {
+  margin-bottom: var(--paragraph-space-below);
+  margin-top: var(--paragraph-space-above);
+}
+
+/*
+ * Inline code
+ */
+body > main code {
+  font-family: var(--inline-code-font-family);
+  font-size: var(--inline-code-font-size);
+  padding: var(--inline-code-padding);
+}
+
+/*
+ * Code block
+ */
+body > main pre {
+  border-radius: var(--code-block-corner-radius);
+  hyphens: none;
+  margin-bottom: var(--code-block-space-below);
+  margin-top: var(--code-block-space-above);
+  overflow: auto;
+  tab-size: var(--code-block-tab-size);
+  word-break: normal;
+}
+
+body > main pre code {
+  display: block;
+  font-family: var(--code-block-font-family);
+  font-size: var(--code-block-font-size);
+  font-weight: var(--code-block-font-weight);
+  line-height: var(--code-block-line-height);
+  padding: var(--code-block-padding);
+  white-space: pre;
+}
+
+/*
+ * Lists
+ */
+body > main ol,
+body > main ul {
+  margin-bottom: var(--list-space-below);
+  margin-top: var(--list-space-above);
+  padding-left: var(--list-padding-left);
+}
+
+body > main ol ol,
+body > main ol ul,
+body > main ul ol,
+body > main ul ul {
+  margin: 0;
+  padding-left: var(--list-item-skip);
+}
+
+/*
+ * Table
+ */
+body > main table {
+  border-collapse: collapse;
+  border-style: solid;
+  border-top: none;
+  border-width: var(--table-border-thickness);
+  margin-bottom: var(--table-space-below);
+  margin-top: var(--table-space-above);
+  width: 100%;
+}
+
+body > main table > thead tr {
+  font-weight: var(--headings-font-weight);
+}
+
+body > main table > tbody td,
+body > main table > thead th {
+  text-align: left;
+}
+
+body > main table > thead th {
+  min-width: var(--table-cell-minimal-width);
+  padding: var(--table-head-cell-padding);
+}
+
+body > main table > tbody td {
+  border-right-style: solid;
+  border-right-width: var(--table-border-thickness);
+  padding: var(--table-body-cell-padding);
+  vertical-align: top;
+}
+
+/*
+ * Footer
+ */
+body > main > footer {
+  text-align: center;
+}

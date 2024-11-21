@@ -1,0 +1,147 @@
+/*
+ * File:    ./src/sphinx_abcdoc_theme/static/css/site.css
+ * Author:  Jiří Kučera <sanczes AT gmail.com>
+ * Date:    2024-11-13 02:20:11 +0100
+ * Project: abcdoc
+ * Brief:   Colors style sheet.
+ * 
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
+ * Base
+ */
+body {
+  background-color: var(--document-background-color);
+  color: var(--content-text-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--headings-color);
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:active,
+a:hover {
+  color: var(--link-hover-color);
+}
+
+/*
+ * Navigation bar
+ */
+body > nav {
+  background-color: var(--navbar-background-color);
+}
+
+body > nav > a {
+  color: var(--navbar-link-color);
+}
+
+body > nav > a:active,
+body > nav > a:hover {
+  background-color: var(--navbar-link-hover-background-color);
+  color: var(--navbar-link-hover-color);
+}
+
+/*
+ * Content
+ */
+body > main {
+  background-color: var(--content-background-color);
+}
+
+body > main h1 {
+  border-bottom-color: var(--title-underline-color);
+  color: var(--title-color);
+}
+
+body > main code {
+  color: var(--inline-code-color);
+}
+
+body > main h1 code,
+body > main h2 code,
+body > main h3 code,
+body > main h4 code,
+body > main h5 code,
+body > main h6 code {
+  color: var(--headings-code-color);
+}
+
+body > main pre {
+  background-color: var(--color-hl-background);
+}
+
+body > main pre code {
+  color: var(--color-hl-plain);
+}
+
+body > main table {
+  border-color: var(--table-border-color);
+}
+
+body > main table > thead tr {
+  background-color: var(--table-border-color);
+  color: var(--table-head-color);
+}
+
+body > main table > tbody tr {
+  background-color: var(--table-odd-row-background-color);
+}
+
+body > main table > tbody tr:nth-child(even) {
+  background-color: var(--table-even-row-background-color);
+}
+
+body > main table > tbody td {
+  border-right-color: var(--table-border-color);
+}
+
+/*
+ * Components
+ */
+.button {
+  background-color: var(--button-background-color);
+}
+
+dl.apidoc > dt {
+  border-bottom-color: var(--apidoc-title-underline-color);
+  color: var(--apidoc-title-color);
+}
+
+dl.apidoc > dt code {
+  color: var(--apidoc-headings-code-color);
+}
+
+dl.apidoc > dd h4,
+dl.apidoc > dd h5,
+dl.apidoc > dd h6 {
+  color: var(--apidoc-headings-color);
+}
+
+dl.apidoc > dd h4 code,
+dl.apidoc > dd h5 code,
+dl.apidoc > dd h6 code {
+  color: var(--apidoc-headings-code-color);
+}
+
+dl.apidoc > dd code.literal {
+  color: var(--apidoc-literal-color);
+}
+
+dl.apidoc > dd pre.signature {
+  background-color: var(--apidoc-signature-background-color);
+  border-left-color: var(--apidoc-signature-left-bar-color);
+}
+
+dl.apidoc > dd pre.signature code {
+  color: var(--apidoc-signature-color);
+}

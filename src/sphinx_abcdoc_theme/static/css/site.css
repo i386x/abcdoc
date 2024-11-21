@@ -1,0 +1,18 @@
+/*
+ * File:    ./src/sphinx_abcdoc_theme/static/css/site.css
+ * Author:  Jiří Kučera <sanczes AT gmail.com>
+ * Date:    2024-11-13 01:44:28 +0100
+ * Project: abcdoc
+ * Brief:   Main style sheet.
+ * 
+ * SPDX-License-Identifier: MIT
+ */
+
+@import url(normalize.css);
+@import url(params.css);
+@import url(base.css);
+@import url(layout.css);
+@import url(navbar.css);
+@import url(content.css);
+@import url(components.css);
+@import url(colors.css);
