@@ -12,6 +12,7 @@
  * Common
  */
 body > main {
+  background-color: var(--content-background-color);
   font-size: var(--text-font-size);
   line-height: var(--text-line-height);
   overflow: auto;
@@ -27,14 +28,18 @@ h3,
 h4,
 h5,
 h6 {
+  color: var(--headings-color);
   font-family: var(--headings-font-family);
   font-weight: var(--headings-font-weight);
   line-height: var(--headings-line-height);
 }
 
 body > main h1 {
-  border-bottom-style: solid;
-  border-bottom-width: var(--title-underline-thickness);
+  border-bottom:
+    var(--title-underline-thickness)
+    solid
+    var(--title-underline-color);
+  color: var(--title-color);
   font-size: var(--title-font-size);
   margin-bottom: var(--title-space-below);
   margin-top: var(--title-space-above);
@@ -61,6 +66,15 @@ body > main h6 {
   margin-top: var(--parasection-space-above);
 }
 
+body > main h1 code,
+body > main h2 code,
+body > main h3 code,
+body > main h4 code,
+body > main h5 code,
+body > main h6 code {
+  color: var(--headings-code-color);
+}
+
 /*
  * Paragraphs
  */
@@ -73,6 +87,7 @@ body > main p {
  * Inline code
  */
 body > main code {
+  color: var(--inline-code-color);
   font-family: var(--inline-code-font-family);
   font-size: var(--inline-code-font-size);
   padding: var(--inline-code-padding);
@@ -82,6 +97,7 @@ body > main code {
  * Code block
  */
 body > main pre {
+  background-color: var(--color-hl-background);
   border-radius: var(--code-block-corner-radius);
   hyphens: none;
   margin-bottom: var(--code-block-space-below);
@@ -92,6 +108,7 @@ body > main pre {
 }
 
 body > main pre code {
+  color: var(--color-hl-plain);
   display: block;
   font-family: var(--code-block-font-family);
   font-size: var(--code-block-font-size);
@@ -123,17 +140,26 @@ body > main ul ul {
  * Table
  */
 body > main table {
+  border: var(--table-border-thickness) solid var(--table-border-color);
   border-collapse: collapse;
-  border-style: solid;
   border-top: none;
-  border-width: var(--table-border-thickness);
   margin-bottom: var(--table-space-below);
   margin-top: var(--table-space-above);
   width: 100%;
 }
 
 body > main table > thead tr {
+  background-color: var(--table-border-color);
+  color: var(--table-head-color);
   font-weight: var(--headings-font-weight);
+}
+
+body > main table > tbody tr {
+  background-color: var(--table-odd-row-background-color);
+}
+
+body > main table > tbody tr:nth-child(even) {
+  background-color: var(--table-even-row-background-color);
 }
 
 body > main table > tbody td,
@@ -147,8 +173,7 @@ body > main table > thead th {
 }
 
 body > main table > tbody td {
-  border-right-style: solid;
-  border-right-width: var(--table-border-thickness);
+  border-right: var(--table-border-thickness) solid var(--table-border-color);
   padding: var(--table-body-cell-padding);
   vertical-align: top;
 }

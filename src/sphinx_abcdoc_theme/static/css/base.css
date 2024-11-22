@@ -52,6 +52,8 @@ html {
 }
 
 body {
+  background-color: var(--document-background-color);
+  color: var(--content-text-color);
   font-family: var(--base-font-family);
   line-height: var(--base-line-height);
 }
@@ -74,5 +76,11 @@ strong {
 }
 
 a {
+  color: var(--link-color);
   text-decoration: none;
+}
+
+a:active,
+a:hover {
+  color: var(--link-hover-color);
 }

@@ -146,13 +146,17 @@ html {
   --table-space-below: var(--generic-block-element-space-y);
 
   /* Components */
+  --apidoc-content-element-space-y: var(--generic-block-element-space-y);
   --apidoc-content-left-skip: 2rem;
   --apidoc-headings-space-above: 1.25rem;
-  --apidoc-headings-space-above-adjustment: 9px;
   --apidoc-headings-space-below: 0;
+  --apidoc-headings-space-y-adjustment: 9px;
   --apidoc-literal-font-size: var(--inline-code-font-size);
+  --apidoc-parameters-skip: 1rem;
   --apidoc-signature-left-bar-thickness: 3px;
   --apidoc-signature-padding: 8px 16px;
+  --apidoc-title-space-above: 1.5rem;
+  --apidoc-title-space-below: 0;
   --apidoc-title-underline-skip: 0.25rem;
   --apidoc-title-underline-thickness: 2px;
   --arrow-vertical-align: 2px;

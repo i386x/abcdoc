@@ -8,6 +8,9 @@
  * SPDX-License-Identifier: MIT
  */
 
+/*
+ * Generic
+ */
 .small {
   font-size: var(--small-font-size);
 }
@@ -44,11 +47,11 @@
   width: 100%;
 }
 
-.arrow-fix {
-  vertical-align: var(--arrow-vertical-align);
-}
-
+/*
+ * Previous and Next buttons
+ */
 .button {
+  background-color: var(--button-background-color);
   border-radius: 9999px;
   display: block;
   padding: var(--button-padding-y) var(--button-padding-x);
@@ -60,70 +63,165 @@
   padding-top: calc(var(--button-padding-y) - var(--arrow-vertical-align));
 }
 
+.arrow-fix {
+  vertical-align: var(--arrow-vertical-align);
+}
+
+/*
+ * API documentation - header
+ */
 dl.apidoc > dt {
-  border-bottom-style: solid;
-  border-bottom-width: var(--apidoc-title-underline-thickness);
+  border-bottom:
+    var(--apidoc-title-underline-thickness)
+    solid
+    var(--apidoc-title-underline-color);
+  color: var(--apidoc-title-color);
   font-weight: var(--headings-font-weight);
+  margin-bottom: var(--apidoc-title-space-below);
+  margin-top: var(--apidoc-title-space-above);
   padding-bottom: var(--apidoc-title-underline-skip);
 }
 
 dl.apidoc > dt code {
+  color: var(--apidoc-headings-code-color);
   font-size: var(--text-font-size);
 }
 
+/*
+ * API documentation - content
+ */
 dl.apidoc > dd {
   margin-left: var(--apidoc-content-left-skip);
 }
 
+/*
+ * API documentation - content: elements spacing
+ */
+dl.apidoc > dd dl,
+dl.apidoc > dd ol,
+dl.apidoc > dd p,
+dl.apidoc > dd pre,
+dl.apidoc > dd table,
+dl.apidoc > dd ul {
+  margin-bottom: var(--apidoc-content-element-space-y);
+  margin-top: var(--apidoc-content-element-space-y);
+}
+
+dl.apidoc > dd p {
+  margin-bottom: 0;
+}
+
+/*
+ * API documentation - content: headings
+ */
 dl.apidoc > dd h4,
 dl.apidoc > dd h5,
 dl.apidoc > dd h6 {
+  color: var(--apidoc-headings-color);
   margin-bottom: var(--apidoc-headings-space-below);
   margin-top: var(--apidoc-headings-space-above);
 }
 
+dl.apidoc > dd h4 code,
+dl.apidoc > dd h5 code,
+dl.apidoc > dd h6 code {
+  color: var(--apidoc-headings-code-color);
+}
+
+/*
+ * API documentation - content: headings space correlation
+ */
+dl.apidoc > dd dl.parameters + h4,
+dl.apidoc > dd dl.parameters + h5,
+dl.apidoc > dd dl.parameters + h6,
 dl.apidoc > dd pre.signature + h4,
 dl.apidoc > dd pre.signature + h5,
 dl.apidoc > dd pre.signature + h6,
 dl.apidoc > dd table + h4,
 dl.apidoc > dd table + h5,
 dl.apidoc > dd table + h6 {
+  /*
+   * Enlarge the block-to-heading space to be the same as the text-to-heading
+   * space
+   */
   margin-top:
     calc(
       var(--apidoc-headings-space-above)
-      + var(--apidoc-headings-space-above-adjustment)
+      + var(--apidoc-headings-space-y-adjustment)
     );
 }
 
 dl.apidoc > dd h4 + p,
+dl.apidoc > dd h4 + ol,
 dl.apidoc > dd h4 + ul,
 dl.apidoc > dd h5 + p,
+dl.apidoc > dd h5 + ol,
 dl.apidoc > dd h5 + ul,
 dl.apidoc > dd h6 + p,
+dl.apidoc > dd h6 + ol,
 dl.apidoc > dd h6 + ul {
+  /*
+   * Shrink the heading-to-text space to be the same as the heading-to-block
+   * space
+   */
   margin-top:
     calc(
-      1rem
-      - var(--apidoc-headings-space-above-adjustment)
+      var(--apidoc-content-element-space-y)
+      - var(--apidoc-headings-space-y-adjustment)
     );
 }
 
+/*
+ * API documentation - content: literal
+ */
 dl.apidoc > dd code.literal {
+  color: var(--apidoc-literal-color);
   font-size: var(--apidoc-literal-font-size);
-}
-
-dl.apidoc > dd pre.signature {
-  border-left-style: solid;
-  border-left-width: var(--apidoc-signature-left-bar-thickness);
-  border-radius: 0;
-}
-
-dl.apidoc > dd pre.signature code {
-  line-height: var(--text-line-height);
-  padding: var(--apidoc-signature-padding);
 }
 
 dl.apidoc > dd table > tbody td code.literal {
   padding-left: 0;
   padding-right: 0;
+}
+
+/*
+ * API documentation - content: signature
+ */
+dl.apidoc > dd pre.signature {
+  background-color: var(--apidoc-signature-background-color);
+  border-left:
+    var(--apidoc-signature-left-bar-thickness)
+    solid
+    var(--apidoc-signature-left-bar-color);
+  border-radius: 0;
+}
+
+dl.apidoc > dd pre.signature code {
+  color: var(--apidoc-signature-color);
+  line-height: var(--text-line-height);
+  padding: var(--apidoc-signature-padding);
+}
+
+/*
+ * API documentation - content: parameters
+ */
+dl.apidoc > dd dl.parameters {
+  background-color: var(--apidoc-signature-background-color);
+  border-left:
+    var(--apidoc-signature-left-bar-thickness)
+    solid
+    var(--apidoc-signature-left-bar-color);
+  padding: var(--apidoc-signature-padding);
+}
+
+dl.apidoc > dd dl.parameters > dt:not(:first-child) {
+  margin-top: var(--apidoc-parameters-skip);
+}
+
+dl.apidoc > dd dl.parameters > dd {
+  margin-left: var(--apidoc-content-left-skip);
+}
+
+dl.apidoc > dd dl.parameters > dd p:first-child {
+  margin-top: 0;
 }
