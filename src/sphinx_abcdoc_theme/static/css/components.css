@@ -48,6 +48,79 @@
 }
 
 /*
+ * Right quotation
+ */
+div.right-quote {
+  font-style: oblique;
+  text-align: right;
+}
+
+h1 + div.right-quote {
+  color: var(--title-color);
+  margin-bottom: var(--title-space-below);
+  margin-top: calc(var(--title-underline-skip) - var(--title-space-below));
+}
+
+/*
+ * Header links
+ */
+a.headerlink {
+  color: var(--headings-color);
+  margin-left: var(--headerlink-space);
+  padding: var(--headerlink-padding);
+  visibility: hidden;
+}
+
+dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink:active,
+dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink:hover,
+dl.apidoc > dd table > tbody td code.literal + a.headerlink:active,
+dl.apidoc > dd table > tbody td code.literal + a.headerlink:hover,
+dl.apidoc > dt > a.headerlink:active,
+dl.apidoc > dt > a.headerlink:hover,
+dl.apidoc > dt > code + a.headerlink:active,
+dl.apidoc > dt > code + a.headerlink:hover,
+a.headerlink:active,
+a.headerlink:hover,
+h1 > a.headerlink:active,
+h1 > a.headerlink:hover {
+  background-color: var(--headerlink-hover-background-color);
+  color: var(--headerlink-hover-color);
+}
+
+h1 > a.headerlink {
+  --headerlink-hover-background-color: var(--title-color);
+  color: var(--title-color);
+}
+
+dl.apidoc > dt > a.headerlink {
+  --headerlink-hover-background-color: var(--apidoc-title-color);
+  color: var(--apidoc-title-color);
+}
+
+dl.apidoc > dt > code + a.headerlink {
+  --headerlink-hover-background-color: var(--apidoc-headings-code-color);
+  color: var(--apidoc-headings-code-color);
+}
+
+dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink,
+dl.apidoc > dd table > tbody td code.literal + a.headerlink {
+  --headerlink-hover-background-color: var(--apidoc-literal-color);
+  color: var(--apidoc-literal-color);
+}
+
+dl.apidoc > dd dl.parameters > dt:hover > a.headerlink,
+dl.apidoc > dd table > tbody td:hover > a.headerlink,
+dl.apidoc > dt:hover > a.headerlink,
+h1:hover > a.headerlink,
+h2:hover > a.headerlink,
+h3:hover > a.headerlink,
+h4:hover > a.headerlink,
+h5:hover > a.headerlink,
+h6:hover > a.headerlink {
+  visibility: visible;
+}
+
+/*
  * Previous and Next buttons
  */
 .button {

@@ -47,6 +47,8 @@ html {
   --content-background-color: var(--color-white-1);
   --content-text-color: var(--color-black-1);
   --document-background-color: var(--color-dark-blue-1);
+  --headerlink-hover-background-color: var(--color-black-2);
+  --headerlink-hover-color: var(--color-white-1);
   --headings-code-color: var(--color-dark-blue-2);
   --headings-color: var(--color-black-2);
   --inline-code-color: var(--color-pink-1);
@@ -163,5 +165,7 @@ html {
   --button-padding-x: 1em;
   --button-padding-y: 0.25em;
   --button-width: 6.3em;
+  --headerlink-padding: 0 0.1em;
+  --headerlink-space: 0.25em;
   --spacer-size: 0.8em;
 }
