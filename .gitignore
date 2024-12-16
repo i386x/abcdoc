@@ -1,5 +1,7 @@
-/.env/
-/.tox/
-__pycache__/
-*.egg-info/
-/docs/build/
+.coverage
+*-coverage.txt
+*.egg-info
+__pycache__
+.eggs/
+.tox/
+dist/

@@ -1,2 +1,19 @@
+#
+# File:    ./MANIFEST.in
+# Author:  Jiří Kučera <sanczes AT gmail.com>
+# Date:    2024-11-06 01:58:57 +0100
+# Project: abcdoc: Tools for generating a documentation
+# Brief:   What extra should or should not be packaged
+#
+# SPDX-License-Identifier: MIT
+#
+
 include LICENSE
-include README.md
+include *.md
+include pyproject.toml
+include tox.ini
+recursive-include src *.pyi
+recursive-include src py.typed
+graft tests
+
+global-exclude *.py[cod]
