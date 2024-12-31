@@ -1,10 +1,12 @@
 .. include:: defs.inc
 
-.. _doitdoc-installation:
+.. _abcdoc-installation:
 
 Installation
 ============
 
-To install |doitdoc|, download the latest tarball, unpack it, and run ::
+You can install |abcdoc| using ``pip``:
 
-    setup.py install
+.. code-block:: console
+
+    $ pip install sphinx-abcdoc-theme

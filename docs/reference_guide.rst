@@ -1,6 +1,6 @@
 .. include:: defs.inc
 
-.. _doit-reference:
+.. _abcdoc-reference_guide:
 
 Reference Guide
 ===============

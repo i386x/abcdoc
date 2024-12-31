@@ -1,5 +1,6 @@
 .. _Sphinx: http://www.sphinx-doc.org/
 
-.. |doit| replace:: *DoIt!*
-.. |doitdoc| replace:: *DoIt! Doc*
+.. |abcdoc| replace:: *abcdoc*
 .. |sphinx| replace:: `Sphinx`_
+.. |source| replace:: https://github.com/i386x/abcdoc
+.. |bug_reports| replace:: https://github.com/i386x/abcdoc/issues

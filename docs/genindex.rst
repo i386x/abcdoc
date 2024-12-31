@@ -1,6 +1,6 @@
 .. include:: defs.inc
 
-.. doitdoc-genindex:
+.. _abcdoc-genindex:
 
 Index
 =====
