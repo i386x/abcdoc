@@ -1,0 +1,12 @@
+#
+# File:    ./src/sphinx_abcdoc_theme/theme.toml
+# Author:  Jiří Kučera <sanczes AT gmail.com>
+# Date:    2024-12-31 20:44:34 +0100
+# Project: abcdoc: Tools for generating a documentation
+# Brief:   Theme configuration
+#
+# SPDX-License-Identifier: MIT
+#
+
+[theme]
+inherit = "basic"
