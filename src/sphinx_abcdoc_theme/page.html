@@ -1,0 +1,11 @@
+{#
+## File:    ./src/sphinx_abcdoc_theme/page.html
+## Author:  Jiří Kučera <sanczes AT gmail.com>
+## Date:    2025-01-22 23:09:20 +0100
+## Project: abcdoc: Tools for generating a documentation
+## Brief:   Page template
+#}
+{%- extends "layout.html" %}
+{%- block body %}
+{{ body|trim|indent(6, True) }}
+{%- endblock %}

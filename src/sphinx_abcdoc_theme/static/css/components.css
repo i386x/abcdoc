@@ -47,6 +47,10 @@
   width: 100%;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 /*
  * Right quotation
  */

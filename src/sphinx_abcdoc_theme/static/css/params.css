@@ -79,6 +79,7 @@ html {
   --footer-space-below: 1.5rem;
   --footer-space-between: 7rem;
   --generic-block-element-space-y: 1rem;
+  --generic-block-element-inside-list-space-y: 0.66rem;
   --navbar-padding-left: 1.5rem;
   --navbar-padding-top: 7rem;
   --navbar-width: 15rem;

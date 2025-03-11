@@ -136,6 +136,36 @@ body > main ul ul {
   padding-left: var(--list-item-skip);
 }
 
+body > main ol li ol,
+body > main ol li p,
+body > main ol li ul,
+body > main ul li ol,
+body > main ul li p,
+body > main ul li ul {
+  margin: 0;
+}
+
+body > main ol li ol + ol,
+body > main ol li ol + p,
+body > main ol li ol + ul,
+body > main ol li p + ol,
+body > main ol li p + p,
+body > main ol li p + ul,
+body > main ol li ul + ol,
+body > main ol li ul + p,
+body > main ol li ul + ul,
+body > main ul li ol + ol,
+body > main ul li ol + p,
+body > main ul li ol + ul,
+body > main ul li p + ol,
+body > main ul li p + p,
+body > main ul li p + ul,
+body > main ul li ul + ol,
+body > main ul li ul + p,
+body > main ul li ul + ul {
+  margin-top: var(--generic-block-element-inside-list-space-y);
+}
+
 /*
  * Table
  */

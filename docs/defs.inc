@@ -1,4 +1,4 @@
-.. _Sphinx: http://www.sphinx-doc.org/
+.. _Sphinx: https://www.sphinx-doc.org/
 
 .. |abcdoc| replace:: *abcdoc*
 .. |sphinx| replace:: `Sphinx`_

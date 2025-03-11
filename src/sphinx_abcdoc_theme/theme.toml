@@ -9,4 +9,7 @@
 #
 
 [theme]
-inherit = "basic"
+inherit = "none"
+stylesheets = [
+    "css/site.css"
+]

@@ -1,12 +1,11 @@
 .. include:: defs.inc
 
-.. _abcdoc-index:
-
 abcdoc
 ======
 
 |abcdoc| provides a |sphinx| theme and extensions to make writing of a project
 documentation more easy. Some of the |abcdoc|'s features:
+
 * allows referencing a function or a method arguments
 
 .. toctree::
@@ -19,7 +18,7 @@ documentation more easy. Some of the |abcdoc|'s features:
    api_reference
    glossary
    genindex
-   changelog
+   change_log
 
 .. contact::
    :source: |source|

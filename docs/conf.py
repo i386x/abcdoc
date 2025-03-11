@@ -14,7 +14,8 @@ from sphinx_abcdoc_theme.version import __version__
 project = "abcdoc"
 description = "Tools for generating a documentation"
 author = "Jiří Kučera"
-copyright = "2018-%Y, Jiří Kučera"
+keywords = ["documentation", "sphinx", "theme"]
+copyright = f"2018-%Y, {author}"
 version = ".".join(__version__.split(".")[:2])
 release = __version__
 
@@ -22,7 +23,6 @@ needs_sphinx = "8.1"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
-    "sphinx_abcdoc_theme",
 ]
 manpages_url = (
     "https://man7.org/linux/man-pages/"
@@ -65,7 +65,7 @@ html_secnumber_suffix = " "
 text_secnumber_suffix = " "
 
 man_pages = [
-    (root_doc, project, description, author, "7"),
+    ("index", project, description, author, "7"),
 ]
 
 linkcheck_report_timeouts_as_broken = True
@@ -82,3 +82,5 @@ python_maximum_signature_line_length = maximum_signature_line_length
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
+
+abcdoc_debug = True
