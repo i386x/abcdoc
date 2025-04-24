@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-language" content="en" />
+    <title>abcdoc Sample Documentation | Reference Guide</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Jiří Kučera" />
+    <meta name="keywords" content="abcdoc, sample" />
+    <meta name="description" content="abcdoc Sample" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="../../src/sphinx_abcdoc_theme/static/css/site.css" />
+  </head>
+
+  <body>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="installation.html">Installation</a>
+      <a href="user_guide.html">User Guide</a>
+      <a href="#">Reference Guide</a>
+      <a href="api_reference.html">API Reference</a>
+      <a href="glossary.html">Glossary</a>
+      <a href="genindex.html">Index</a>
+      <a href="change_log.html">Change Log</a>
+    </nav>
+
+    <main autofocus>
+      <div class="content">
+        <section id="reference-guide" tabindex="-1">
+          <h1>Reference Guide<a class="headerlink" href="#reference-guide">&#x00B6;</a></h1>
+          <p>
+            On this page you can find a comprehensive reference to the command
+            line interface and configuration options.
+          </p>
+          <section id="cli-utilities" tabindex="-1">
+            <h2>CLI Utilities<a class="headerlink" href="#cli-utilities">&#x00B6;</a></h2>
+            <dl class="apidoc manpage">
+              <dt id="foo-tool" class="literal"><code>foo-tool</code><a class="headerlink" href="#foo-tool">&#x00B6;</a></dt>
+              <dd>
+                <p>
+                  <code class="remove-left-space">foo-tool</code> is here to do
+                  some foo things.
+                </p>
+                <h4>Usage</h4>
+                <pre><code>foo-tool [-hio] [--help] [--interactive] [--output FILE]
+         [FILE]...</code></pre>
+                <h4>Options</h4>
+                <dl class="parameters">
+                  <dt id="foo-tool%3Aoption%3A--help" class="literal"><code>-h, --help</code><a class="headerlink" href="#foo-tool%3Aoption%3A--help">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      Print this screen and exit
+                    </p>
+                  </dd>
+                  <dt id="foo-tool%3Aoption%3A--interactive" class="literal"><code>-i, --interactive</code><a class="headerlink" href="#foo-tool%3Aoption%3A--interactive">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      Ask a question before performing an action
+                    </p>
+                  </dd>
+                  <dt id="foo-tool%3Aoption%3A--output" class="literal"><code>-o, --output FILE</code><a class="headerlink" href="#foo-tool%3Aoption%3A--output">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      Write the output to <code>FILE</code>
+                    </p>
+                  </dd>
+                </dl>
+              </dd>
+            </dl>
+          </section>
+          <section id="configuration-files" tabindex="-1">
+            <h2>Configuration Files<a class="headerlink" href="#configuration-files">&#x00B6;</a></h2>
+            <dl class="apidoc manpage">
+              <dt id="foo.ini" class="literal"><code>foo.ini</code><a class="headerlink" href="#foo.ini">&#x00B6;</a></dt>
+              <dd>
+                <h4 id="foo.ini%3Aauth"><code class="remove-left-space">[auth]</code> Section<a class="headerlink" href="#foo.ini%3Aauth">&#x00B6;</a></h4>
+                <dl class="parameters">
+                  <dt id="foo.ini%3Aauth%3Auser" class="literal"><code>user</code><a class="headerlink" href="#foo.ini%3Aauth%3Auser">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      User id
+                    </p>
+                  </dd>
+                  <dt id="foo.ini%3Aauth%3Atoken" class="literal"><code>token</code><a class="headerlink" href="#foo.ini%3Aauth%3Atoken">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      User token
+                    </p>
+                  </dd>
+                </dl>
+                <h4 id="foo.ini%3Anetwork"><code class="remove-left-space">[network]</code> Section<a class="headerlink" href="#foo.ini%3Anetwork">&#x00B6;</a></h4>
+                <dl class="parameters">
+                  <dt id="foo.ini%3Anetwork%3Aipv4" class="literal"><code>ipv4</code><a class="headerlink" href="#foo.ini%3Anetwork%3Aipv4">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      IPv4 address
+                    </p>
+                  </dd>
+                  <dt id="foo.ini%3Anetwork%3Aipv6" class="literal"><code>ipv6</code><a class="headerlink" href="#foo.ini%3Anetwork%3Aipv6">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      IPv6 address
+                    </p>
+                  </dd>
+                  <dt id="foo.ini%3Anetwork%3Aport" class="literal"><code>port</code><a class="headerlink" href="#foo.ini%3Anetwork%3Aport">&#x00B6;</a></dt>
+                  <dd>
+                    <p>
+                      Port number
+                    </p>
+                  </dd>
+                </dl>
+              </dd>
+            </dl>
+          </section>
+        </section>
+        <footer>
+          <a class="button button-arrow-fix" href="user_guide.html"><span class="arrow-fix right-spacer">&#x25C0;</span>Previous</a>
+          <div class="small footer-space-between">
+            &#169; Copyright 2018-2024, Jiří Kučera.<br/>
+            Build with <a href="https://www.sphinx-doc.org/">Sphinx</a> using
+            the <a href="https://github.com/i386x/abcdoc">abcdoc</a> theme.
+          </div>
+          <a class="button button-arrow-fix" href="api_reference.html">Next<span class="arrow-fix left-spacer">&#x25B6;</span></a>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>

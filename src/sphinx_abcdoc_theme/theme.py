@@ -21,7 +21,7 @@ from sphinx_abcdoc_theme.writer import HtmlTranslator
 
 
 class PutToCInsideSection(SphinxTransform):
-    """"""
+    """Put the Table of Contents inside a section."""
 
     default_priority = 702
 

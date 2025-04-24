@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-language" content="en" />
+    <title>abcdoc Sample Documentation | API Reference</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Jiří Kučera" />
+    <meta name="keywords" content="abcdoc, sample" />
+    <meta name="description" content="abcdoc Sample" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="../../src/sphinx_abcdoc_theme/static/css/site.css" />
+  </head>
+
+  <body>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="installation.html">Installation</a>
+      <a href="user_guide.html">User Guide</a>
+      <a href="reference_guide.html">Reference Guide</a>
+      <a href="#">API Reference</a>
+      <a href="glossary.html">Glossary</a>
+      <a href="genindex.html">Index</a>
+      <a href="change_log.html">Change Log</a>
+    </nav>
+
+    <main autofocus>
+      <div class="content">
+        <section id="api-reference" tabindex="-1">
+          <h1>API Reference<a class="headerlink" href="#api-reference">&#x00B6;</a></h1>
+          <p>
+            An example of API reference.
+          </p>
+          <section id="module-vutils.testing.mock" tabindex="-1">
+            <h2><code class="remove-left-space">vutils.testing.mock</code> module<a class="headerlink" href="#module-vutils.testing.mock">&#x00B6;</a></h2>
+            <dl class="apidoc">
+              <dt id="vutils.testing.mock.make_mock" class="literal"><code>make_mock()</code><a class="headerlink" href="#vutils.testing.mock.make_mock">&#x00B6;</a></dt>
+              <dd>
+                <p>Make a mockable object.</p>
+                <h4>Signature</h4>
+                <pre class="signature"><code>def make_mock(*args: <a href="https://docs.python.org/3/library/functions.html#object">object</a>, **kwargs: <a href="https://docs.python.org/3/library/functions.html#object">object</a>) -> <a href="https://docs.python.org/3/library/unittest.html#module-unittest">unittest</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#module-unittest.mock">mock</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock">Mock</a></code></pre>
+                <h4>Parameters</h4>
+                <table class="full-width">
+                  <thead>
+                    <tr>
+                      <th class="quarter-width">Name</th>
+                      <th class="quarter-width">Type</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td id="vutils.testing.mock.make_mock%3Aargs" class="literal"><code>*args</code><a class="headerlink" href="#vutils.testing.mock.make_mock%3Aargs">&#x00B6;</a></td>
+                      <td class="literal"><code><a href="https://docs.python.org/3/library/functions.html#object">object</a></code></td>
+                      <td>Positional arguments</td>
+                    </tr>
+                    <tr>
+                      <td id="vutils.testing.mock.make_mock%3Akwargs" class="literal"><code>**kwargs</code><a class="headerlink" href="#vutils.testing.mock.make_mock%3Akwargs">&#x00B6;</a></td>
+                      <td class="literal"><code><a href="https://docs.python.org/3/library/functions.html#object">object</a></code></td>
+                      <td>Key-value arguments</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <h4>Returns</h4>
+                <p>
+                  Returns the mock object (<code class="literal"><a href="https://docs.python.org/3/library/unittest.html#module-unittest">unittest</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#module-unittest.mock">mock</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock">Mock</a></code>).
+                </p>
+                <h4>Raises</h4>
+                <ul>
+                  <li><code class="literal remove-left-space"><a href="https://docs.python.org/3/library/exceptions.html#AssertionError">AssertionError</a></code> when checks fail</li>
+                </ul>
+                <h4>Description</h4>
+                <p>
+                  Some detailed description.
+                </p>
+              </dd>
+              <dt id="vutils.testing.mock.make_callable" class="literal"><code>make_callable()</code><a class="headerlink" href="#vutils.testing.mock.make_callable">&#x00B6;</a></dt>
+              <dd>
+                <p>
+                  Make a callable object.
+                </p>
+                <h4>Signature</h4>
+                <pre class="signature"><code>def make_callable(*args: <a href="https://docs.python.org/3/library/functions.html#object">object</a>, **kwargs: <a href="https://docs.python.org/3/library/functions.html#object">object</a>) -> <a href="https://docs.python.org/3/library/unittest.html#module-unittest">unittest</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#module-unittest.mock">mock</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock">Mock</a></code></pre>
+                <h4>Parameters</h4>
+                <dl class="parameters">
+                  <dt id="vutils.testing.mock.make_callable%3Aargs" class="literal"><code>*args: <a href="https://docs.python.org/3/library/functions.html#object">object</a></code><a class="headerlink" href="#vutils.testing.mock.make_callable%3Aargs">&#x00B6;</a></dt>
+                  <dd>
+                    <p>Positional arguments</p>
+                  </dd>
+                  <dt id="vutils.testing.mock.make_callable%3Akwargs" class="literal"><code>**kwargs: <a href="https://docs.python.org/3/library/functions.html#object">object</a></code><a class="headerlink" href="#vutils.testing.mock.make_callable%3Akwargs">&#x00B6;</a></dt>
+                  <dd>
+                    <p>Key-value arguments</p>
+                  </dd>
+                </dl>
+                <h4>Returns</h4>
+                <p>
+                  Returns the mock object (<code class="literal"><a href="https://docs.python.org/3/library/unittest.html#module-unittest">unittest</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#module-unittest.mock">mock</a>.<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock">Mock</a></code>).
+                </p>
+                <h4>Raises</h4>
+                <ul>
+                  <li><code class="literal remove-left-space"><a href="https://docs.python.org/3/library/exceptions.html#AssertionError">AssertionError</a></code> when checks fail</li>
+                </ul>
+                <h4>Description</h4>
+                <p>
+                  Some detailed description.
+                </p>
+              </dd>
+            </dl>
+          </section>
+        </section>
+        <footer>
+          <a class="button button-arrow-fix" href="reference_guide.html"><span class="arrow-fix right-spacer">&#x25C0;</span>Previous</a>
+          <div class="small footer-space-between">
+            &#169; Copyright 2018-2024, Jiří Kučera.<br/>
+            Build with <a href="https://www.sphinx-doc.org/">Sphinx</a> using
+            the <a href="https://github.com/i386x/abcdoc">abcdoc</a> theme.
+          </div>
+          <a class="button button-arrow-fix" href="glossary.html">Next<span class="arrow-fix left-spacer">&#x25B6;</span></a>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>

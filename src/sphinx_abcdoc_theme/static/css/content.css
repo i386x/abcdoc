@@ -9,19 +9,33 @@
  */
 
 /*
- * Common
+ * Main container
  */
-body > main {
+main {
+  overflow: auto;
+}
+
+main:focus-visible {
+  outline: none;
+}
+
+/*
+ * Content container
+ */
+div.content {
   background-color: var(--content-background-color);
   font-size: var(--text-font-size);
   line-height: var(--text-line-height);
-  overflow: auto;
   word-wrap: break-word;
 }
 
 /*
  * Headings
  */
+section:focus-visible {
+  outline: none;
+}
+
 h1,
 h2,
 h3,
@@ -34,7 +48,7 @@ h6 {
   line-height: var(--headings-line-height);
 }
 
-body > main h1 {
+h1 {
   border-bottom:
     var(--title-underline-thickness)
     solid
@@ -46,39 +60,39 @@ body > main h1 {
   padding-bottom: var(--title-underline-skip);
 }
 
-body > main h2 {
+h2 {
   font-size: var(--section-font-size);
   margin-bottom: var(--section-space-below);
   margin-top: var(--section-space-above);
 }
 
-body > main h3 {
+h3 {
   font-size: var(--subsection-font-size);
   margin-bottom: var(--subsection-space-below);
   margin-top: var(--subsection-space-above);
 }
 
-body > main h4,
-body > main h5,
-body > main h6 {
+h4,
+h5,
+h6 {
   font-size: var(--parasection-font-size);
   margin-bottom: var(--parasection-space-below);
   margin-top: var(--parasection-space-above);
 }
 
-body > main h1 code,
-body > main h2 code,
-body > main h3 code,
-body > main h4 code,
-body > main h5 code,
-body > main h6 code {
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
   color: var(--headings-code-color);
 }
 
 /*
  * Paragraphs
  */
-body > main p {
+p {
   margin-bottom: var(--paragraph-space-below);
   margin-top: var(--paragraph-space-above);
 }
@@ -86,17 +100,17 @@ body > main p {
 /*
  * Inline code
  */
-body > main code {
+code {
   color: var(--inline-code-color);
   font-family: var(--inline-code-font-family);
   font-size: var(--inline-code-font-size);
-  padding: var(--inline-code-padding);
+  padding: var(--inline-code-padding-y) var(--inline-code-padding-x);
 }
 
 /*
  * Code block
  */
-body > main pre {
+pre {
   background-color: var(--color-hl-background);
   border-radius: var(--code-block-corner-radius);
   hyphens: none;
@@ -107,7 +121,7 @@ body > main pre {
   word-break: normal;
 }
 
-body > main pre code {
+pre code {
   color: var(--color-hl-plain);
   display: block;
   font-family: var(--code-block-font-family);
@@ -121,88 +135,204 @@ body > main pre code {
 /*
  * Lists
  */
-body > main ol,
-body > main ul {
+ol,
+ul {
   margin-bottom: var(--list-space-below);
   margin-top: var(--list-space-above);
   padding-left: var(--list-padding-left);
 }
 
-body > main ol ol,
-body > main ol ul,
-body > main ul ol,
-body > main ul ul {
+ol ol,
+ol ul,
+ul ol,
+ul ul {
   margin: 0;
   padding-left: var(--list-item-skip);
 }
 
-body > main ol li ol,
-body > main ol li p,
-body > main ol li ul,
-body > main ul li ol,
-body > main ul li p,
-body > main ul li ul {
+li ol,
+li p,
+li table,
+li ul {
   margin: 0;
 }
 
-body > main ol li ol + ol,
-body > main ol li ol + p,
-body > main ol li ol + ul,
-body > main ol li p + ol,
-body > main ol li p + p,
-body > main ol li p + ul,
-body > main ol li ul + ol,
-body > main ol li ul + p,
-body > main ol li ul + ul,
-body > main ul li ol + ol,
-body > main ul li ol + p,
-body > main ul li ol + ul,
-body > main ul li p + ol,
-body > main ul li p + p,
-body > main ul li p + ul,
-body > main ul li ul + ol,
-body > main ul li ul + p,
-body > main ul li ul + ul {
+li ol + ol,
+li ol + p,
+li ol + table,
+li ol + ul,
+li p + ol,
+li p + p,
+li p + table,
+li p + ul,
+li table + ol,
+li table + p,
+li table + table,
+li table + ul,
+li ul + ol,
+li ul + p,
+li ul + table,
+li ul + ul {
   margin-top: var(--generic-block-element-inside-list-space-y);
+}
+
+table ul {
+  list-style: disc;
+}
+
+table ul ul {
+  list-style: circle;
+}
+
+table ul ul ul {
+  list-style: square;
+}
+
+/*
+ * Definition list
+ */
+dl {
+  /*
+   * Enlarge the block-to-heading space to be the same as the text-to-heading
+   * space
+   */
+  --deflist-block-to-heading-space:
+    calc(
+      var(--deflist-headings-space-above)
+      + var(--deflist-headings-space-y-adjustment)
+    );
+  /*
+   * Shrink the heading-to-text space to be the same as the heading-to-block
+   * space
+   */
+  --deflist-heading-to-text-space:
+    calc(
+      var(--deflist-data-element-space-y)
+      - var(--deflist-headings-space-y-adjustment)
+    );
+  /*
+   * Shrink the space between paragraphs
+   */
+  --deflist-paragraph-to-paragraph-space:
+    calc(
+      var(--deflist-data-element-space-y)
+      - var(--deflist-paragraphs-space-y-adjustment)
+    );
+}
+
+dt {
+  color: var(--deflist-term-color);
+  font-weight: var(--headings-font-weight);
+  margin-bottom: var(--deflist-term-space-below);
+  margin-top: var(--deflist-term-space-above);
+}
+
+dt code {
+  color: var(--deflist-term-code-color);
+  font-size: var(--text-font-size);
+}
+
+dd {
+  margin-left: var(--deflist-data-left-skip);
+}
+
+dd h4,
+dd h5,
+dd h6 {
+  color: var(--deflist-headings-color);
+  margin-bottom: var(--deflist-headings-space-below);
+  margin-top: var(--deflist-headings-space-above);
+}
+
+dd h4 code,
+dd h5 code,
+dd h6 code {
+  color: var(--deflist-headings-code-color);
+}
+
+dd dl,
+dd ol,
+dd p,
+dd pre,
+dd table,
+dd ul {
+  margin-bottom: var(--deflist-data-element-space-y);
+  margin-top: var(--deflist-data-element-space-y);
+}
+
+dd p {
+  margin-bottom: 0;
+}
+
+dd > dl:first-child,
+dd > ol:first-child,
+dd > ol li > p:first-child,
+dd > p:first-child,
+dd > pre:first-child,
+dd > table:first-child,
+dd > ul:first-child,
+dd > ul li > p:first-child {
+  margin-top: 0;
+}
+
+dd table + h4,
+dd table + h5,
+dd table + h6 {
+  margin-top: var(--deflist-block-to-heading-space);
+}
+
+dd h4 + ol,
+dd h4 + p,
+dd h4 + ul,
+dd h5 + ol,
+dd h5 + p,
+dd h5 + ul,
+dd h6 + ol,
+dd h6 + p,
+dd h6 + ul {
+  margin-top: var(--deflist-heading-to-text-space);
+}
+
+dd p + p {
+  margin-top: var(--deflist-paragraph-to-paragraph-space);
 }
 
 /*
  * Table
  */
-body > main table {
+table {
   border: var(--table-border-thickness) solid var(--table-border-color);
   border-collapse: collapse;
   border-top: none;
   margin-bottom: var(--table-space-below);
   margin-top: var(--table-space-above);
-  width: 100%;
 }
 
-body > main table > thead tr {
+thead tr {
   background-color: var(--table-border-color);
   color: var(--table-head-color);
   font-weight: var(--headings-font-weight);
 }
 
-body > main table > tbody tr {
+tbody tr {
   background-color: var(--table-odd-row-background-color);
 }
 
-body > main table > tbody tr:nth-child(even) {
+tbody tr:nth-child(even) {
   background-color: var(--table-even-row-background-color);
 }
 
-body > main table > tbody td,
-body > main table > thead th {
+tbody td,
+thead th {
   text-align: left;
 }
 
-body > main table > thead th {
+thead th {
   min-width: var(--table-cell-minimal-width);
   padding: var(--table-head-cell-padding);
 }
 
-body > main table > tbody td {
+tbody td {
   border-right: var(--table-border-thickness) solid var(--table-border-color);
   padding: var(--table-body-cell-padding);
   vertical-align: top;
@@ -211,6 +341,6 @@ body > main table > tbody td {
 /*
  * Footer
  */
-body > main > footer {
+footer {
   text-align: center;
 }

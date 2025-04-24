@@ -39,23 +39,25 @@
 {{ navbar()|trim|indent(6, True) }}
     </nav>
 
-    <main>
+    <main autofocus>
+      <div class="content">
 {%- block body %}
-{{ body|trim|indent(6, True) }}
+{{ body|trim|indent(8, True) }}
 {%- endblock %}
-      <footer>
+        <footer>
 {%- if prev %}
-        <a class="button button-arrow-fix" href="{{ prev.link|e }}"><span class="arrow-fix right-spacer">&#x25C0;</span>Previous</a>
+          <a class="button button-arrow-fix" href="{{ prev.link|e }}"><span class="arrow-fix right-spacer">&#x25C0;</span>Previous</a>
 {%- endif %}
-        <div class="small footer-space-between">
-          &#169; Copyright {{ copyright }}.<br/>
-          Build with <a href="https://www.sphinx-doc.org/">Sphinx</a> using the
-          <a href="https://github.com/i386x/abcdoc">abcdoc</a> theme.
-        </div>
+          <div class="small footer-space-between">
+            &#169; Copyright {{ copyright }}.<br/>
+            Build with <a href="https://www.sphinx-doc.org/">Sphinx</a> using
+            the <a href="https://github.com/i386x/abcdoc">abcdoc</a> theme.
+          </div>
 {%- if next %}
-        <a class="button button-arrow-fix" href="{{ next.link|e }}">Next<span class="arrow-fix left-spacer">&#x25B6;</span></a>
+          <a class="button button-arrow-fix" href="{{ next.link|e }}">Next<span class="arrow-fix left-spacer">&#x25B6;</span></a>
 {%- endif %}
-      </footer>
+        </footer>
+      </div>
     </main>
   </body>
 </html>

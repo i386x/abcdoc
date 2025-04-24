@@ -52,6 +52,29 @@
 }
 
 /*
+ * Literal
+ */
+code.literal {
+  color: var(--literal-color);
+  font-size: var(--literal-font-size);
+}
+
+dt.literal code,
+li.literal code,
+p.literal code,
+td.literal code {
+  color: var(--literal-color);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+li.literal code,
+p.literal code,
+td.literal code {
+  font-size: var(--literal-font-size);
+}
+
+/*
  * Right quotation
  */
 div.right-quote {
@@ -75,18 +98,18 @@ a.headerlink {
   visibility: hidden;
 }
 
-dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink:active,
-dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink:hover,
-dl.apidoc > dd table > tbody td code.literal + a.headerlink:active,
-dl.apidoc > dd table > tbody td code.literal + a.headerlink:hover,
-dl.apidoc > dt > a.headerlink:active,
-dl.apidoc > dt > a.headerlink:hover,
-dl.apidoc > dt > code + a.headerlink:active,
-dl.apidoc > dt > code + a.headerlink:hover,
 a.headerlink:active,
 a.headerlink:hover,
+dt > a.headerlink:active,
+dt > a.headerlink:hover,
+dt.literal > code + a.headerlink:active,
+dt.literal > code + a.headerlink:hover,
 h1 > a.headerlink:active,
-h1 > a.headerlink:hover {
+h1 > a.headerlink:hover,
+h2.index > a.headerlink:active,
+h2.index > a.headerlink:hover,
+td.literal code + a.headerlink:active,
+td.literal code + a.headerlink:hover {
   background-color: var(--headerlink-hover-background-color);
   color: var(--headerlink-hover-color);
 }
@@ -96,31 +119,31 @@ h1 > a.headerlink {
   color: var(--title-color);
 }
 
-dl.apidoc > dt > a.headerlink {
-  --headerlink-hover-background-color: var(--apidoc-title-color);
-  color: var(--apidoc-title-color);
+h2.index > a.headerlink {
+  --headerlink-hover-background-color: var(--index-headings-color);
+  color: var(--index-headings-color);
 }
 
-dl.apidoc > dt > code + a.headerlink {
-  --headerlink-hover-background-color: var(--apidoc-headings-code-color);
-  color: var(--apidoc-headings-code-color);
+dt > a.headerlink {
+  --headerlink-hover-background-color: var(--deflist-term-color);
+  color: var(--deflist-term-color);
 }
 
-dl.apidoc > dd dl.parameters > dt > code.literal + a.headerlink,
-dl.apidoc > dd table > tbody td code.literal + a.headerlink {
-  --headerlink-hover-background-color: var(--apidoc-literal-color);
-  color: var(--apidoc-literal-color);
+dt.literal > code + a.headerlink,
+td.literal > code + a.headerlink {
+  --headerlink-hover-background-color: var(--literal-color);
+  color: var(--literal-color);
+  margin-left: calc(var(--headerlink-space) + var(--inline-code-padding-x));
 }
 
-dl.apidoc > dd dl.parameters > dt:hover > a.headerlink,
-dl.apidoc > dd table > tbody td:hover > a.headerlink,
-dl.apidoc > dt:hover > a.headerlink,
+dt:hover > a.headerlink,
 h1:hover > a.headerlink,
 h2:hover > a.headerlink,
 h3:hover > a.headerlink,
 h4:hover > a.headerlink,
 h5:hover > a.headerlink,
-h6:hover > a.headerlink {
+h6:hover > a.headerlink,
+td.literal:hover > a.headerlink {
   visibility: visible;
 }
 
@@ -129,7 +152,7 @@ h6:hover > a.headerlink {
  */
 .button {
   background-color: var(--button-background-color);
-  border-radius: 9999px;
+  border-radius: var(--full-round);
   display: block;
   padding: var(--button-padding-y) var(--button-padding-x);
   text-align: center;
@@ -145,160 +168,144 @@ h6:hover > a.headerlink {
 }
 
 /*
- * API documentation - header
+ * API documentation
  */
 dl.apidoc > dt {
   border-bottom:
     var(--apidoc-title-underline-thickness)
     solid
     var(--apidoc-title-underline-color);
-  color: var(--apidoc-title-color);
-  font-weight: var(--headings-font-weight);
   margin-bottom: var(--apidoc-title-space-below);
-  margin-top: var(--apidoc-title-space-above);
   padding-bottom: var(--apidoc-title-underline-skip);
 }
 
-dl.apidoc > dt code {
-  color: var(--apidoc-headings-code-color);
-  font-size: var(--text-font-size);
+dl.apidoc > dd > p:first-child {
+  margin-top: var(--deflist-data-element-space-y);
 }
 
 /*
- * API documentation - content
+ * Signature
  */
-dl.apidoc > dd {
-  margin-left: var(--apidoc-content-left-skip);
-}
-
-/*
- * API documentation - content: elements spacing
- */
-dl.apidoc > dd dl,
-dl.apidoc > dd ol,
-dl.apidoc > dd p,
-dl.apidoc > dd pre,
-dl.apidoc > dd table,
-dl.apidoc > dd ul {
-  margin-bottom: var(--apidoc-content-element-space-y);
-  margin-top: var(--apidoc-content-element-space-y);
-}
-
-dl.apidoc > dd p {
-  margin-bottom: 0;
-}
-
-/*
- * API documentation - content: headings
- */
-dl.apidoc > dd h4,
-dl.apidoc > dd h5,
-dl.apidoc > dd h6 {
-  color: var(--apidoc-headings-color);
-  margin-bottom: var(--apidoc-headings-space-below);
-  margin-top: var(--apidoc-headings-space-above);
-}
-
-dl.apidoc > dd h4 code,
-dl.apidoc > dd h5 code,
-dl.apidoc > dd h6 code {
-  color: var(--apidoc-headings-code-color);
-}
-
-/*
- * API documentation - content: headings space correlation
- */
-dl.apidoc > dd dl.parameters + h4,
-dl.apidoc > dd dl.parameters + h5,
-dl.apidoc > dd dl.parameters + h6,
-dl.apidoc > dd pre.signature + h4,
-dl.apidoc > dd pre.signature + h5,
-dl.apidoc > dd pre.signature + h6,
-dl.apidoc > dd table + h4,
-dl.apidoc > dd table + h5,
-dl.apidoc > dd table + h6 {
-  /*
-   * Enlarge the block-to-heading space to be the same as the text-to-heading
-   * space
-   */
-  margin-top:
-    calc(
-      var(--apidoc-headings-space-above)
-      + var(--apidoc-headings-space-y-adjustment)
-    );
-}
-
-dl.apidoc > dd h4 + p,
-dl.apidoc > dd h4 + ol,
-dl.apidoc > dd h4 + ul,
-dl.apidoc > dd h5 + p,
-dl.apidoc > dd h5 + ol,
-dl.apidoc > dd h5 + ul,
-dl.apidoc > dd h6 + p,
-dl.apidoc > dd h6 + ol,
-dl.apidoc > dd h6 + ul {
-  /*
-   * Shrink the heading-to-text space to be the same as the heading-to-block
-   * space
-   */
-  margin-top:
-    calc(
-      var(--apidoc-content-element-space-y)
-      - var(--apidoc-headings-space-y-adjustment)
-    );
-}
-
-/*
- * API documentation - content: literal
- */
-dl.apidoc > dd code.literal {
-  color: var(--apidoc-literal-color);
-  font-size: var(--apidoc-literal-font-size);
-}
-
-dl.apidoc > dd table > tbody td code.literal {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/*
- * API documentation - content: signature
- */
-dl.apidoc > dd pre.signature {
-  background-color: var(--apidoc-signature-background-color);
+pre.signature {
+  background-color: var(--signature-background-color);
   border-left:
-    var(--apidoc-signature-left-bar-thickness)
+    var(--signature-left-bar-thickness)
     solid
-    var(--apidoc-signature-left-bar-color);
+    var(--signature-left-bar-color);
   border-radius: 0;
 }
 
-dl.apidoc > dd pre.signature code {
-  color: var(--apidoc-signature-color);
+pre.signature code {
+  color: var(--signature-color);
   line-height: var(--text-line-height);
-  padding: var(--apidoc-signature-padding);
+  padding: var(--signature-padding);
+}
+
+dd pre.signature + h4,
+dd pre.signature + h5,
+dd pre.signature + h6 {
+  margin-top: var(--deflist-block-to-heading-space);
 }
 
 /*
- * API documentation - content: parameters
+ * Parameters
  */
-dl.apidoc > dd dl.parameters {
-  background-color: var(--apidoc-signature-background-color);
+dl.parameters {
+  background-color: var(--parameters-background-color);
   border-left:
-    var(--apidoc-signature-left-bar-thickness)
+    var(--parameters-left-bar-thickness)
     solid
-    var(--apidoc-signature-left-bar-color);
-  padding: var(--apidoc-signature-padding);
+    var(--parameters-left-bar-color);
+  padding: var(--parameters-padding);
 }
 
-dl.apidoc > dd dl.parameters > dt:not(:first-child) {
-  margin-top: var(--apidoc-parameters-skip);
-}
-
-dl.apidoc > dd dl.parameters > dd {
-  margin-left: var(--apidoc-content-left-skip);
-}
-
-dl.apidoc > dd dl.parameters > dd p:first-child {
+dl.parameters > dt {
+  font-weight: normal;
   margin-top: 0;
+}
+
+dl.parameters > dt.literal code {
+  font-size: var(--literal-font-size);
+}
+
+dl.parameters > dt:not(:first-child) {
+  margin-top: var(--parameters-skip);
+}
+
+dl.parameters > dd {
+  margin-left: var(--deflist-data-left-skip);
+}
+
+dl.parameters > dd > p:first-child {
+  margin-top: 0;
+}
+
+dd dl.parameters + h4,
+dd dl.parameters + h5,
+dd dl.parameters + h6 {
+  margin-top: var(--deflist-block-to-heading-space);
+}
+
+/*
+ * Manual page
+ */
+dl.manpage > dd h4,
+dl.manpage > dd h5,
+dl.manpage > dd h6 {
+  margin-left: calc(var(--deflist-data-left-skip) * -1);
+}
+
+/*
+ * Change log
+ */
+dl.changelog > dd > ul {
+  padding-left: var(--changelog-list-padding-left);
+}
+
+/*
+ * Index
+ */
+nav.index {
+  background-color: var(--index-navbar-background-color);
+  display: flex;
+  flex-direction: row;
+  font-size: var(--index-navbar-font-size);
+  width: 100%;
+}
+
+h1 + nav.index {
+  margin-bottom: var(--title-space-below);
+  margin-top:
+    calc(var(--index-navbar-space-above) - var(--title-space-below));
+}
+
+nav.index > a,
+nav.index > span {
+  display: block;
+  flex: 1 0 auto;
+  text-align: center;
+}
+
+nav.index > a:active,
+nav.index > a:hover {
+  background-color: var(--index-navbar-link-hover-background-color);
+}
+
+h2.index {
+  color: var(--index-headings-color);
+  font-size: var(--index-headings-font-size);
+  margin-bottom: var(--index-headings-space-below);
+  margin-top: var(--index-headings-space-above);
+}
+
+ul.index,
+ul.index ul,
+ul.index ul ul {
+  list-style: none;
+  margin: 0;
+  padding-left: var(--index-item-skip);
+}
+
+ul.index {
+  padding-left: var(--index-padding-left);
 }

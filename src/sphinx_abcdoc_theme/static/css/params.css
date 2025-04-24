@@ -35,29 +35,35 @@ html {
 
 html {
   /* Colors */
-  --apidoc-headings-code-color: var(--color-dark-blue-2);
-  --apidoc-headings-color: var(--color-black-2);
-  --apidoc-literal-color: var(--color-dark-blue-2);
-  --apidoc-signature-background-color: var(--color-grey-1);
-  --apidoc-signature-color: var(--color-dark-blue-2);
-  --apidoc-signature-left-bar-color: var(--color-dark-blue-2);
-  --apidoc-title-color: var(--color-black-2);
   --apidoc-title-underline-color: var(--color-dark-blue-2);
   --button-background-color: var(--color-dark-blue-1);
   --content-background-color: var(--color-white-1);
   --content-text-color: var(--color-black-1);
+  --deflist-headings-code-color: var(--color-dark-blue-2);
+  --deflist-headings-color: var(--color-black-2);
+  --deflist-term-code-color: var(--color-dark-blue-2);
+  --deflist-term-color: var(--color-black-2);
   --document-background-color: var(--color-dark-blue-1);
   --headerlink-hover-background-color: var(--color-black-2);
   --headerlink-hover-color: var(--color-white-1);
   --headings-code-color: var(--color-dark-blue-2);
   --headings-color: var(--color-black-2);
+  --index-headings-color: var(--color-dark-blue-2);
+  --index-navbar-background-color: var(--color-grey-2);
+  --index-navbar-link-hover-background-color: var(--color-dark-blue-2);
   --inline-code-color: var(--color-pink-1);
   --link-color: var(--color-green-1);
   --link-hover-color: var(--color-light-green-1);
+  --literal-color: var(--color-dark-blue-2);
   --navbar-background-color: var(--color-dark-blue-1);
   --navbar-link-color: var(--color-green-1);
   --navbar-link-hover-background-color: var(--color-black-2);
   --navbar-link-hover-color: var(--color-light-green-1);
+  --parameters-background-color: var(--color-grey-1);
+  --parameters-left-bar-color: var(--color-dark-blue-2);
+  --signature-background-color: var(--color-grey-1);
+  --signature-color: var(--color-dark-blue-2);
+  --signature-left-bar-color: var(--color-dark-blue-2);
   --table-border-color: var(--color-dark-blue-2);
   --table-even-row-background-color: var(--color-grey-2);
   --table-head-color: var(--color-white-1);
@@ -78,8 +84,8 @@ html {
   --footer-space-above: 9rem;
   --footer-space-below: 1.5rem;
   --footer-space-between: 7rem;
-  --generic-block-element-space-y: 1rem;
   --generic-block-element-inside-list-space-y: 0.66rem;
+  --generic-block-element-space-y: 1rem;
   --navbar-padding-left: 1.5rem;
   --navbar-padding-top: 7rem;
   --navbar-width: 15rem;
@@ -122,7 +128,8 @@ html {
 
   /* Inline code */
   --inline-code-font-size: 0.9em;
-  --inline-code-padding: 0 0.25rem;
+  --inline-code-padding-x: 0.25rem;
+  --inline-code-padding-y: 0;
 
   /* Code block */
   --code-block-corner-radius: 8px;
@@ -135,10 +142,20 @@ html {
   --code-block-tab-size: 4;
 
   /* List */
-  --list-item-skip: 1em;
+  --list-item-skip: 2em;
   --list-padding-left: 2em;
   --list-space-above: var(--generic-block-element-space-y);
   --list-space-below: var(--generic-block-element-space-y);
+
+  /* Definition list */
+  --deflist-data-element-space-y: var(--generic-block-element-space-y);
+  --deflist-data-left-skip: 2rem;
+  --deflist-headings-space-above: 1.25rem;
+  --deflist-headings-space-below: 0;
+  --deflist-headings-space-y-adjustment: 9px;
+  --deflist-paragraphs-space-y-adjustment: 8px;
+  --deflist-term-space-above: 1.5rem;
+  --deflist-term-space-below: 0.25rem;
 
   /* Table */
   --table-body-cell-padding: 0.5em 1em;
@@ -149,16 +166,6 @@ html {
   --table-space-below: var(--generic-block-element-space-y);
 
   /* Components */
-  --apidoc-content-element-space-y: var(--generic-block-element-space-y);
-  --apidoc-content-left-skip: 2rem;
-  --apidoc-headings-space-above: 1.25rem;
-  --apidoc-headings-space-below: 0;
-  --apidoc-headings-space-y-adjustment: 9px;
-  --apidoc-literal-font-size: var(--inline-code-font-size);
-  --apidoc-parameters-skip: 1rem;
-  --apidoc-signature-left-bar-thickness: 3px;
-  --apidoc-signature-padding: 8px 16px;
-  --apidoc-title-space-above: 1.5rem;
   --apidoc-title-space-below: 0;
   --apidoc-title-underline-skip: 0.25rem;
   --apidoc-title-underline-thickness: 2px;
@@ -166,7 +173,22 @@ html {
   --button-padding-x: 1em;
   --button-padding-y: 0.25em;
   --button-width: 6.3em;
+  --changelog-list-padding-left: 1em;
+  --full-round: 9999px;
   --headerlink-padding: 0 0.1em;
   --headerlink-space: 0.25em;
+  --index-headings-font-size: var(--subsection-font-size);
+  --index-headings-space-above: var(--subsection-space-above);
+  --index-headings-space-below: 0.5rem;
+  --index-item-skip: 1.25em;
+  --index-navbar-font-size: var(--subsection-font-size);
+  --index-navbar-space-above: 2rem;
+  --index-padding-left: 1em;
+  --literal-font-size: var(--inline-code-font-size);
+  --parameters-left-bar-thickness: 3px;
+  --parameters-padding: 8px 16px;
+  --parameters-skip: 1rem;
+  --signature-left-bar-thickness: 3px;
+  --signature-padding: 8px 16px;
   --spacer-size: 0.8em;
 }
