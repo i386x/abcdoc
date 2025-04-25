@@ -63,7 +63,7 @@ def html_escape(text):
 
 
 def indent(level, stride=1):
-    return " "*stride*level
+    return " " * stride * level
 
 
 def indent_text(text, level, stride=1):
@@ -92,7 +92,7 @@ def wrap(text, limit=79, indent=0, tokenizer_re=None):
     for word in tokenize(text, tokenizer_re):
         nspaces = indent if len(line) == 0 else 1
         word = indent_text(word, nspaces)
-        if limit - len(line) >= (len(word) + 1)//2 or len(line) == 0:
+        if limit - len(line) >= (len(word) + 1) // 2 or len(line) == 0:
             line += word
         else:
             yield f"{line}\n"

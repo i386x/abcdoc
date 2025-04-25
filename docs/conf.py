@@ -25,8 +25,7 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 manpages_url = (
-    "https://man7.org/linux/man-pages/"
-    "man{section}/{page}.{section}.html"
+    "https://man7.org/linux/man-pages/man{section}/{page}.{section}.html"
 )
 today_fmt = "%Y-%m-%d"
 

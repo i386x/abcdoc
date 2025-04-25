@@ -60,9 +60,8 @@ def tag_attr(attrs, name):
     if a_name not in attrs:
         return ""
     value = attrs[a_name]
-    if (
-        isinstance(value, collections.abc.Iterable)
-        and not isinstance(value, str)
+    if isinstance(value, collections.abc.Iterable) and not isinstance(
+        value, str
     ):
         value = " ".join(value)
     return f' {name}="{value}"'
@@ -91,9 +90,7 @@ class ConflictingIdError(ThemeError):
 
     def __init__(self, node, cid):
         """"""
-        ThemeError.__init__(
-            self, f"Id `{cid}` from `{node}` already used"
-        )
+        ThemeError.__init__(self, f"Id `{cid}` from `{node}` already used")
 
 
 class AmbiguousIdsError(ThemeError):
@@ -299,7 +296,7 @@ class HtmlTranslatorBase(SphinxTranslator):
         if wrap:
             for line in wrap_func(
                 text,
-                indent=indent_level*HTML_INDENT_STRIDE,
+                indent=indent_level * HTML_INDENT_STRIDE,
                 tokenizer_re=HTML_WORD_TOKENIZER_RE,
             ):
                 container.append(line)
@@ -321,7 +318,9 @@ class HtmlTranslatorBase(SphinxTranslator):
     def end_tag(self, name, container=None, inline=0):
         if inline == 0:
             self.html_indent_level -= 1
-        self.contribute(f"</{name}>", container=container, indent=(inline == 0))
+        self.contribute(
+            f"</{name}>", container=container, indent=(inline == 0)
+        )
         if inline < 2:
             self.contribute("\n", container=container)
 
@@ -576,12 +575,16 @@ class HtmlTranslator(HtmlTranslatorBase):
         title_text = self.context.get_content(True)
         self.context.pop_node(node)
 
-        section_level = self.context.get_section_level() if not self.is_partial_node else 1
+        section_level = (
+            self.context.get_section_level() if not self.is_partial_node else 1
+        )
         if section_level > MAX_HTML_HEADER_LEVEL:
             section_level = MAX_HTML_HEADER_LEVEL
         if section_level == 1:
             self.add_title(title_text)
-        section_id = self.context.get_section_id() if not self.is_partial_node else None
+        section_id = (
+            self.context.get_section_id() if not self.is_partial_node else None
+        )
 
         self.start_tag(f"h{section_level}", inline=1)
         self.contribute(title_text)
@@ -593,7 +596,9 @@ class HtmlTranslator(HtmlTranslatorBase):
             and self.config.description
         ):
             self.start_tag("div", a_class="right-quote")
-            self.contribute(f"{html_escape(self.config.description)}\n", indent=True)
+            self.contribute(
+                f"{html_escape(self.config.description)}\n", indent=True
+            )
             self.end_tag("div")
 
     def visit_Text(self, node):

@@ -59,9 +59,13 @@ def setup_context(app, pagename, templatename, context, doctree):
         """"""
         reobj = re.compile(regex)
         for item in files:
-            basename = pathlib.Path(
-                item.filename if hasattr(item, "filename") else item
-            ).resolve().name
+            basename = (
+                pathlib.Path(
+                    item.filename if hasattr(item, "filename") else item
+                )
+                .resolve()
+                .name
+            )
             if reobj.match(basename):
                 yield item
 
