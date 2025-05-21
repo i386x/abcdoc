@@ -6,21 +6,60 @@
 #
 # SPDX-License-Identifier: MIT
 #
-"""Utilities."""
+"""
+Utilities.
+
+.. _document node: https://docutils.sourceforge.io/docs/ref/doctree.html
+
+.. |document node| replace:: `document node`_
+"""
 
 import re
+from typing import TYPE_CHECKING, cast
 
 from docutils.nodes import Text
 
-NAVBAR_ATTR = "navbar"
-SOURCE_ATTR = "source"
-IDS_ATTR = "ids"
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Iterator, Mapping, Sequence, Set
 
-WS_RE = re.compile(r"\s+")
-WORD_TOKENIZER_RE = re.compile(r"\s+|\S+")
-HTML_WORD_TOKENIZER_RE = re.compile(r"\s+|(<[^>]*>|\S+)+")
+    from docutils.nodes import Node
 
-HTML_ESCAPE_TABLE = {
+    from sphinx_abcdoc_theme import NodeP
+
+#: The ``attributes`` keyword
+ATTRIBUTES_KW: str = "attributes"
+
+#: The name of ``tagname`` attribute
+TAGNAME_ATTR: str = "tagname"
+#: The name of ``navbar`` attribute
+NAVBAR_ATTR: str = "navbar"
+#: The name of ``source`` attribute
+SOURCE_ATTR: str = "source"
+#: The name of ``ids`` attribute
+IDS_ATTR: str = "ids"
+
+#: The regular expression matching a non-empty sequence of white-space
+#: characters
+WS_RE: "re.Pattern[str]" = re.compile(r"\s+")
+#: The regular expression matching either a non-empty sequence of white-space
+#: characters or a non-empty sequence of non-white-space characters (a.k.a.
+#: *words*)
+WORD_TOKENIZER_RE: "re.Pattern[str]" = re.compile(r"\s+|\S+")
+#: The regular expression matching one of:
+#:
+#:   #. a non-empty sequence of white-space characters
+#:   #. a non-empty sequence of words and/or tags, where
+#:
+#:      * a *word* is a non-empty sequence of non-white-space characters
+#:      * a *tag* is a sequence of characters between ``<`` and ``>``,
+#:        including ``<`` and ``>``
+#:
+HTML_WORD_TOKENIZER_RE: "re.Pattern[str]" = re.compile(r"\s+|(<[^>]*>|\S+)+")
+
+#: The mapping between Unicode code-points of special characters and their HTML
+#: escape sequence
+HTML_ESCAPE_TABLE: "Mapping[int, str]" = {
     ord('"'): "&quot;",
     ord("&"): "&amp;",
     ord("<"): "&lt;",
@@ -28,11 +67,15 @@ HTML_ESCAPE_TABLE = {
     ord("@"): "&#64;",
 }
 
-LOG_INDENT_STRIDE = 2
+#: The number of spaces (ASCII 32) between two adjacent indentation levels in
+#: log messages
+LOG_INDENT_STRIDE: int = 2
 
-NODE_ATTRIBUTES = (
+#: The list of a |document node| attributes that should be included in debug
+#: log messages
+NODE_ATTRIBUTES: "Sequence[str]" = (
     "rawsource",
-    "attributes",
+    ATTRIBUTES_KW,
     "current_source",
     "current_line",
     "indirect_targets",
@@ -55,42 +98,110 @@ NODE_ATTRIBUTES = (
     "toctree",
     NAVBAR_ATTR,
 )
-NODE_ATTRIBUTES_CONTAINERS = {"attributes"}
+#: The set of |document node| attributes that are actually attribute
+#: containers, holding other set of attributes together with their values.
+#: Attributes from these containers should also be included in debug log
+#: messages
+NODE_ATTRIBUTES_CONTAINERS: "Set[str]" = {ATTRIBUTES_KW}
 
 
-def html_escape(text):
+def html_escape(text: str) -> str:
+    """
+    Escape special characters.
+
+    :param text: The text to be escaped
+    :return: the escaped :xarg:`text`
+
+    First, replace all sequences of white-space characters with a single space
+    (ASCII 32). Then replace all special characters with the corresponding HTML
+    escape sequences.
+    """
     return WS_RE.sub(" ", text).translate(HTML_ESCAPE_TABLE)
 
 
-def indent(level, stride=1):
+def indentation(level: int, stride: int = 1) -> str:
+    """
+    Make an indentation.
+
+    :param level: The indentation level
+    :param stride: The indentation stride
+    :return: the indentation
+
+    The indentation is a sequence of spaces (ASCII 32) of the length
+    :xarg:`stride` multiplied by :xarg:`level`. Note that :xarg:`stride` is a
+    jump between two adjacent indentation levels.
+    """
     return " " * stride * level
 
 
-def indent_text(text, level, stride=1):
-    return indent(level, stride) + text
+def indent_text(text: str, level: int, stride: int = 1) -> str:
+    """
+    Indent a text.
+
+    :param text: The text to be indented
+    :param level: The indentation level
+    :param stride: The indentation stride
+    :return: the indented :xarg:`text`
+
+    Indent :xarg:`text` by :xarg:`level` times :xarg:`stride` spaces
+    (ASCII 32).
+    """
+    return indentation(level, stride) + text
 
 
-def tokenize(text, reobj):
-    pos = 0
+def tokenize(text: str, reobj: "re.Pattern[str]") -> "Iterator[str]":
+    """
+    Tokenize the text using the given regular expression.
+
+    :param text: The text to be tokenized
+    :param reobj: The compiled regular expression used for tokenizing
+    :return: the sequence of tokens
+    :raises ValueError: when :xarg:`text` cannot be tokenized with
+        :xarg:`reobj`
+
+    :xarg:`reobj` is used to split :xarg:`text` into matching tokens. Tokens
+    consisting only from white-space characters are discarded from the output.
+    """
+    pos: int = 0
     while pos < len(text):
-        match = reobj.match(text, pos)
-        if match:
-            result = match.group().strip()
+        matched: "re.Match[str] | None" = reobj.match(text, pos)
+        if matched:
+            result: str = matched.group().strip()
             if result:
                 yield result
-            pos += len(match.group())
+            pos += len(matched.group())
             continue
         raise ValueError(
             f"Cannot match `{text}` with `{reobj.pattern}` at {pos}"
         )
 
 
-def wrap(text, limit=79, indent=0, tokenizer_re=None):
+def wrap(
+    text: str,
+    limit: int = 79,
+    indent: int = 0,
+    tokenizer_re: "re.Pattern[str] | None" = None,
+) -> "Iterator[str]":
+    """
+    Break text into lines of length close to the limit.
+
+    :param text: The text to be wrapped
+    :param limit: The requested line length, including line indentation
+    :param indent: The indentation length of every line
+    :param tokenizer_re: The compiled regular expression used to split
+        :xarg:`text` into words (the default is :const:`.WORD_TOKENIZER_RE`)
+    :return: the sequence of lines
+
+    :xarg:`text` is broken into lines, where the length of each line plus
+    :xarg:`indent` is as close to :xarg:`limit` as possible.
+    :xarg:`tokenizer_re` controls how :xarg:`text` is broken into words from
+    which a line is formed. A line break is never taken inside a word.
+    """
     if tokenizer_re is None:
         tokenizer_re = WORD_TOKENIZER_RE
-    line = ""
+    line: str = ""
     for word in tokenize(text, tokenizer_re):
-        nspaces = indent if len(line) == 0 else 1
+        nspaces: int = indent if len(line) == 0 else 1
         word = indent_text(word, nspaces)
         if limit - len(line) >= (len(word) + 1) // 2 or len(line) == 0:
             line += word
@@ -101,32 +212,105 @@ def wrap(text, limit=79, indent=0, tokenizer_re=None):
         yield f"{line}\n"
 
 
-def node_attribute_as_str(node, attr, level, preffix="", suffix=""):
-    result = ""
+def node_attribute_as_str(
+    node: "NodeP",
+    attr: str,
+    level: int,
+    prefix: str = "",
+    suffix: str = "",
+) -> str:
+    """
+    Print the node attribute to a string.
+
+    :param node: The document node
+    :param attr: The attribute name
+    :param level: The indentation level
+    :param prefix: The prefix prepended to the output
+    :param suffix: The suffix appended to the output
+    :return: the string representation of the attribute
+
+    Print :xarg:`attr`, together with its value, from :xarg:`node` to a string.
+    If :xarg:`attr` is a container of attributes, print these attributes
+    instead.
+
+    Each attribute is printed as :xarg:`prefix`, followed by the indentation
+    given by :xarg:`level` multiplied by :const:`.LOG_INDENT_STRIDE`, followed
+    by the attribute name and attribute value, separated with ``": "``, and
+    finally followed by :xarg:`suffix`.
+
+    If :xarg:`attr` is not in :xarg:`node`, empty string is returned.
+    """
+    result: str = ""
     if not hasattr(node, attr):
         return result
-    container = getattr(node, attr)
-    if not attr in NODE_ATTRIBUTES_CONTAINERS:
-        container = {attr: container}
+    container: "Mapping[str, object]" = (
+        cast("Mapping[str, object]", getattr(node, attr))
+        if attr in NODE_ATTRIBUTES_CONTAINERS
+        else {attr: cast(object, getattr(node, attr))}
+    )
     for key, value in container.items():
-        result += preffix + indent_text(
+        result += prefix + indent_text(
             f"{key}: {value}{suffix}", level, stride=LOG_INDENT_STRIDE
         )
     return result
 
 
-def log_node_start(node, level, logger):
-    """Log a node."""
-    message = indent_text(f"<{node.tagname}", level, stride=LOG_INDENT_STRIDE)
-    if isinstance(node, Text):
+def tagname(node: "NodeP") -> str:
+    """
+    Get the tag name associated with the node, if any.
+
+    :param node: The document node
+    :return: the tag name associated with :xarg:`node`
+
+    If :xarg:`node` has no tag name associated with, use its class name.
+    """
+    return cast(
+        str, getattr(node, TAGNAME_ATTR, f"#node:{type(node).__name__}")
+    )
+
+
+def log_node_start(
+    node: "NodeP",
+    level: int,
+    logger: "logging.LoggerAdapter[logging.Logger]",
+) -> None:
+    """
+    Open the node log.
+
+    :param node: The document node
+    :param level: The indentation level
+    :param logger: The logger
+
+    Write :xarg:`node` and its attributes to the logging output at the debug
+    level, format and intend it properly so the children of :xarg:`node` can
+    be logged afterwards.
+    """
+    message: str = indent_text(
+        f"<{tagname(node)}", level, stride=LOG_INDENT_STRIDE
+    )
+    if isinstance(cast("Node", node), Text):
         message += f" {node}"
     for attr in NODE_ATTRIBUTES:
-        message += node_attribute_as_str(node, attr, level + 1, preffix="\n")
+        message += node_attribute_as_str(node, attr, level + 1, prefix="\n")
     message += ">"
     logger.debug("%s", message)
 
 
-def log_node_end(node, level, logger):
+def log_node_end(
+    node: "NodeP",
+    level: int,
+    logger: "logging.LoggerAdapter[logging.Logger]",
+) -> None:
+    """
+    Close the node log.
+
+    :param node: The document node
+    :param level: The indentation level
+    :param logger: The logger
+
+    Close :xarg:`node` and its children in the logging output at the debug
+    level.
+    """
     logger.debug(
-        "%s</%s>", indent(level, stride=LOG_INDENT_STRIDE), node.tagname
+        "%s</%s>", indentation(level, stride=LOG_INDENT_STRIDE), tagname(node)
     )

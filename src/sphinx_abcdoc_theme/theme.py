@@ -12,7 +12,6 @@ import pathlib
 import re
 
 from docutils.nodes import compound, section
-
 from sphinx.environment.adapters.toctree import global_toctree_for_doc
 from sphinx.transforms import SphinxTransform
 from sphinx.util.nodes import make_id

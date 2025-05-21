@@ -11,5 +11,5 @@
 [theme]
 inherit = "none"
 stylesheets = [
-    "css/site.css"
+    "css/site.css",
 ]

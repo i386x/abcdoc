@@ -8,14 +8,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-include LICENSE
 include *.md
-include pyproject.toml
 include tox.ini
+recursive-include docs *.inc
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include src *.css
 recursive-include src *.html
 recursive-include src *.pyi
 recursive-include src py.typed
 recursive-include src *.toml
 graft tests
-
-global-exclude *.py[cod]

@@ -24,6 +24,7 @@ ensure_newline_before_comments = true
 line_length = 79
 
 [tool.pylint.main]
+load-plugins = ["pylint_per_file_ignores"]
 ignore-patterns = ["^\\.#", "^.*\\.pyi"]
 
 [tool.pylint.design]
@@ -36,6 +37,10 @@ max-line-length = 79
 enable = ["useless-suppression"]
 # `mypy` does the better job
 disable = ["no-member"]
+per-file-ignores = [
+    # Disable checks on Sphinx configuration options
+    "docs/conf.py:invalid-name,redefined-builtin",
+]
 
 [tool.pylint.similarities]
 ignore-imports = true

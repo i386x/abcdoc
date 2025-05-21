@@ -10,7 +10,6 @@
 
 from sphinx_abcdoc_theme.version import __version__
 
-
 project = "abcdoc"
 description = "Tools for generating a documentation"
 author = "Jiří Kučera"
