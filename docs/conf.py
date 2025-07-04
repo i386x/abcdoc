@@ -21,6 +21,7 @@ release = __version__
 needs_sphinx = "8.1"
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
 ]
 manpages_url = (
@@ -76,6 +77,16 @@ javascript_maximum_signature_line_length = maximum_signature_line_length
 
 python_display_short_literal_types = True
 python_maximum_signature_line_length = maximum_signature_line_length
+
+extlinks = {
+    "directives": (
+        (
+            "https://www.sphinx-doc.org/en/master/usage/restructuredtext/"
+            "directives.html#%s"
+        ),
+        None,
+    ),
+}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

@@ -9,9 +9,7 @@
 """
 HTML writer.
 
-.. |abcdoc_debug| replace:: ``abcdoc_debug``
-.. |html_permalinks| replace:: ``html_permalinks``
-.. |html_permalinks_icon| replace:: ``html_permalinks_icon``
+.. include:: defs.inc
 """
 
 import pathlib
@@ -21,13 +19,15 @@ from typing import TYPE_CHECKING, cast
 from docutils.nodes import SkipChildren
 from docutils.writers._html_base import Writer
 from sphinx.errors import ThemeError
-from sphinx.util.docutils import SphinxTranslator
 from sphinx.util.logging import getLogger
 
 from sphinx_abcdoc_theme.utils import (
-    ATTRIBUTES_KW,
     HTML_WORD_TOKENIZER_RE,
     IDS_ATTR,
+    LAST_CHAR_ATTR,
+    NAVBAR_ATTR,
+    REFID_ATTR,
+    REFURI_ATTR,
     SOURCE_ATTR,
     html_escape,
     indent_text,
@@ -42,20 +42,17 @@ if TYPE_CHECKING:
         Mapping,
         MutableMapping,
         MutableSequence,
-        MutableSet,
         Sequence,
-        Set,
     )
 
-    from docutils.nodes import Node, document
-    from sphinx.builders import Builder
-    from sphinx.config import Config
-
-    from sphinx_abcdoc_theme import ConfigP, DocumentP, ElementP, NodeP
-    from sphinx_abcdoc_theme import SectionP as section
-    from sphinx_abcdoc_theme import StrPath
+    from sphinx_abcdoc_theme import Builder, Config
+    from sphinx_abcdoc_theme import Document as document
+    from sphinx_abcdoc_theme import Element, Node
+    from sphinx_abcdoc_theme import Section as section
+    from sphinx_abcdoc_theme import SphinxTranslator, StrPath, Text
 else:
     from docutils.nodes import section
+    from sphinx.util.docutils import SphinxTranslator
 
 #: Initial indentation level in the rendered HTML output
 HTML_INDENT_BASE: int = 0
@@ -66,10 +63,12 @@ HTML_INDENT_STRIDE: int = 2
 MAX_HTML_HEADER_LEVEL: int = 6
 #: The name of a partial document node
 PARTIAL_NODE_NAME: str = "<partial node>"
+#: The name of ``navbar`` scope
+NAVBAR_SCOPE: str = "navbar"
 
 
 def node_source(
-    node: "ElementP", default: "StrPath | None" = None
+    node: "Element", default: "StrPath | None" = None
 ) -> "StrPath | None":
     """
     Get the document node source.
@@ -83,10 +82,10 @@ def node_source(
     """
     if SOURCE_ATTR not in node:
         return default
-    return cast("StrPath", node[SOURCE_ATTR])
+    return node[SOURCE_ATTR]
 
 
-def is_partial_node(node: "ElementP") -> bool:
+def is_partial_node(node: "Element") -> bool:
     """
     Test whether the document node is a partial node.
 
@@ -96,7 +95,7 @@ def is_partial_node(node: "ElementP") -> bool:
     return node_source(node, "") == PARTIAL_NODE_NAME
 
 
-def is_index(document: "ElementP", config: "Config") -> bool:
+def is_index(document: "Element", config: "Config") -> bool:
     """
     Test whether the document is the root document.
 
@@ -112,9 +111,10 @@ def is_index(document: "ElementP", config: "Config") -> bool:
     if source is None:
         return False
     source_path: "pathlib.Path" = pathlib.Path(source).resolve()
-    return source_path.stem == cast(
-        str, config.root_doc
-    ) and source_path.suffix in cast("Mapping[str, str]", config.source_suffix)
+    return (
+        source_path.stem == config.root_doc
+        and source_path.suffix in config.source_suffix
+    )
 
 
 def tag_attr(attrs: "Mapping[str, str | Sequence[str]]", name: str) -> str:
@@ -170,7 +170,7 @@ class MissingIdsError(ThemeError):
 
     __slots__ = ()
 
-    def __init__(self, node: "NodeP") -> None:
+    def __init__(self, node: "Node") -> None:
         """
         Initialize the error.
 
@@ -179,7 +179,7 @@ class MissingIdsError(ThemeError):
         ThemeError.__init__(self, f"`{node}` has no {IDS_ATTR}")
 
 
-def check_ids(node: "NodeP") -> None:
+def check_ids(node: "Element") -> None:
     """
     Check whether the node contains the ``ids`` attribute.
 
@@ -187,14 +187,11 @@ def check_ids(node: "NodeP") -> None:
     :raises .MissingIdsError: when :xarg:`node` does not contain ``ids``
         attribute
     """
-    if IDS_ATTR not in cast(
-        "Mapping[str, Sequence[str]]",
-        getattr(node, ATTRIBUTES_KW, cast("Mapping[str, Sequence[str]]", {})),
-    ):
+    if IDS_ATTR not in node or len(node[IDS_ATTR]) == 0:
         raise MissingIdsError(node)
 
 
-def get_id(node: "NodeP") -> str:
+def get_id(node: "Element") -> str:
     """
     Get the document node id.
 
@@ -203,9 +200,7 @@ def get_id(node: "NodeP") -> str:
     :raises ~.MissingIdsError: when :xarg:`node` has no ids
     """
     check_ids(node)
-    return cast(
-        "Sequence[str]", cast("ElementP", node).attributes[IDS_ATTR]
-    )[0]
+    return node[IDS_ATTR][0]
 
 
 class ConflictingIdError(ThemeError):
@@ -213,7 +208,7 @@ class ConflictingIdError(ThemeError):
 
     __slots__ = ()
 
-    def __init__(self, node: "NodeP", cid: str) -> None:
+    def __init__(self, node: "Node", cid: str) -> None:
         """
         Initialize the error.
 
@@ -233,7 +228,7 @@ class AmbiguousIdsError(ThemeError):
 
     __slots__ = ()
 
-    def __init__(self, node: "NodeP", ids: "Iterable[str]") -> None:
+    def __init__(self, node: "Node", ids: "Iterable[str]") -> None:
         """
         Initialize the error.
 
@@ -264,7 +259,7 @@ class MissingRefError(ThemeError):
 
     __slots__ = ()
 
-    def __init__(self, node: "NodeP") -> None:
+    def __init__(self, node: "Node") -> None:
         """
         Initialize the error.
 
@@ -307,11 +302,11 @@ class Context:
     #: The stack keeping scope names
     scope_stack: "MutableSequence[str]"
     #: The stack keeping document nodes
-    node_stack: "MutableSequence[ElementP]"
+    node_stack: "MutableSequence[Element]"
     #: The stack keeping sections
     section_stack: "MutableSequence[section]"
     #: The mapping between node and output fragment
-    node2fragment: "MutableMapping[ElementP, MutableSequence[str]]"
+    node2fragment: "MutableMapping[Element, MutableSequence[str]]"
 
     __slots__ = ("scope_stack", "node_stack", "section_stack", "node2fragment")
 
@@ -394,7 +389,7 @@ class Context:
         """
         return scope in self.scope_stack
 
-    def push_node(self, node: "ElementP") -> None:
+    def push_node(self, node: "Element") -> None:
         """
         Push the document node.
 
@@ -403,7 +398,7 @@ class Context:
         self.node_stack.append(node)
         self.node2fragment[node] = []
 
-    def pop_node(self, node: "ElementP") -> None:
+    def pop_node(self, node: "Element") -> None:
         """
         Pop the document node.
 
@@ -416,7 +411,7 @@ class Context:
         self.node_stack.pop(-1)
         del self.node2fragment[node]
 
-    def push_section(self, node: "ElementP") -> None:
+    def push_section(self, node: "Element") -> None:
         """
         Push the section.
 
@@ -428,7 +423,7 @@ class Context:
         self.push_node(node)
         self.section_stack.append(node)
 
-    def pop_section(self, node: "ElementP") -> None:
+    def pop_section(self, node: "Element") -> None:
         """
         Pop the section.
 
@@ -466,7 +461,7 @@ class Context:
         self.check_section_stack()
         top: section = self.section_stack[-1]
         check_ids(top)
-        return cast("Sequence[str]", top.attributes[IDS_ATTR])[0]
+        return top[IDS_ATTR][0]
 
     def get_content_container(self) -> "MutableSequence[str]":
         """
@@ -691,7 +686,7 @@ class HtmlTranslatorBase(SphinxTranslator):
         If :xarg:`container` is :obj:`None`, :attr:`~.HtmlTranslatorBase.body`
         is used.
         """
-        self.contribute(f"<{name}", container=container, indent=(inline < 2))
+        self.contribute(f"<{name}", container=container, indent=inline < 2)
         self.contribute(tag_attr(attrs, "id"), container=container)
         self.contribute(tag_attr(attrs, "class"), container=container)
         self.contribute(tag_attr(attrs, "href"), container=container)
@@ -735,10 +730,8 @@ class HtmlTranslatorBase(SphinxTranslator):
 
         :param node: The document node
         """
-        if cast("ConfigP", self.config).abcdoc_debug:
-            log_node_start(
-                cast("NodeP", node), self.log_indent_level, self.logger
-            )
+        if self.config.abcdoc_debug:
+            log_node_start(node, self.log_indent_level, self.logger)
             self.log_indent_level += 1
         SphinxTranslator.dispatch_visit(self, node)
 
@@ -748,11 +741,9 @@ class HtmlTranslatorBase(SphinxTranslator):
 
         :param node: The document node
         """
-        if cast("ConfigP", self.config).abcdoc_debug:
+        if self.config.abcdoc_debug:
             self.log_indent_level -= 1
-            log_node_end(
-                cast("NodeP", node), self.log_indent_level, self.logger
-            )
+            log_node_end(node, self.log_indent_level, self.logger)
         SphinxTranslator.dispatch_departure(self, node)
 
     def unknown_departure(self, node: "Node") -> None:
@@ -761,7 +752,7 @@ class HtmlTranslatorBase(SphinxTranslator):
 
         :param node: The document node
         """
-        if cast("ConfigP", self.config).abcdoc_debug:
+        if self.config.abcdoc_debug:
             return
         SphinxTranslator.unknown_departure(self, node)
 
@@ -878,9 +869,9 @@ class HtmlTranslator(HtmlTranslatorBase):
     #: The id alias to the candidate id mapping
     id2id: "MutableMapping[str, str]"
     #: The set of pending ids that need to be processed
-    pending_ids: "MutableSet[str]"
+    pending_ids: "set[str]"
     #: The root node of the document tree
-    document_root: "DocumentP | None"
+    document_root: "document | None"
     #: The flag telling whether the root of the document tree is a partial
     #: node. This means that the document is artificially fabricated and to be
     #: inserted into the main document
@@ -908,7 +899,7 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.document_root = None
         self.is_partial_node = False
 
-    def candidate_id(self, node: "NodeP") -> str:
+    def candidate_id(self, node: "Element") -> str:
         """
         Select the candidate id for the node.
 
@@ -919,30 +910,16 @@ class HtmlTranslator(HtmlTranslatorBase):
             candidate id
         """
         check_ids(node)
-        common: "MutableSet[str]" = cast(
-            "MutableSet[str]",
-            self.pending_ids
-            & cast(
-                "Set[str]",
-                set(
-                    cast(
-                        "Iterable[str]",
-                        cast("ElementP", node).attributes[IDS_ATTR],
-                    )
-                ),
-            ),
-        )
+        common: "set[str]" = self.pending_ids & set(node[IDS_ATTR])
         if len(common) > 1:
             raise AmbiguousIdsError(node, common)
         if len(common) == 1:
             cid: str = common.pop()
             self.pending_ids.remove(cid)
             return cid
-        return cast(
-            "Sequence[str]", cast("ElementP", node).attributes[IDS_ATTR]
-        )[0]
+        return node[IDS_ATTR][0]
 
-    def collect_ids(self, node: "NodeP") -> None:
+    def collect_ids(self, node: "Element") -> None:
         """
         Collect node ids.
 
@@ -954,9 +931,7 @@ class HtmlTranslator(HtmlTranslatorBase):
         Collect all ids of :xarg:`node` and map them to its candidate id.
         """
         id0: str = self.candidate_id(node)
-        for idn in cast(
-            "Iterable[str]", cast("ElementP", node).attributes[IDS_ATTR]
-        ):
+        for idn in node[IDS_ATTR]:
             if idn in self.id2id:
                 raise ConflictingIdError(node, idn)
             self.id2id[idn] = id0
@@ -1004,77 +979,131 @@ class HtmlTranslator(HtmlTranslatorBase):
         """
         if not self.config.html_permalinks or tid is None:
             return
-        href = f"#{self.translate_id(tid)}"
+        href: str = f"#{self.translate_id(tid)}"
         self.start_tag("a", inline=2, a_class="headerlink", a_href=href)
         self.contribute(self.config.html_permalinks_icon)
         self.end_tag("a", inline=2)
 
-    def visit_bullet_list(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def visit_bullet_list(self, node: "Element") -> None:
+        """
+        Start the translation of the |bullet_list| document node.
+
+        :param node: The |bullet_list| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
         self.dump_inline_elements()
         self.start_tag("ul")
         self.context.push_node(node)
 
-    def depart_bullet_list(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def depart_bullet_list(self, node: "Element") -> None:
+        """
+        Finish the translation of the |bullet_list| document node.
+
+        :param node: The |bullet_list| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
         self.dump_inline_elements()
         self.context.pop_node(node)
         self.end_tag("ul")
 
-    def visit_compact_paragraph(self, node):
-        """"""
-        if "navbar" in node and node["navbar"]:
-            self.context.push_scope("navbar")
+    def visit_compact_paragraph(self, node: "Element") -> None:
+        """
+        Start the translation of the |compact_paragraph| document node.
 
-    def depart_compact_paragraph(self, node):
-        """"""
-        if "navbar" in node and node["navbar"]:
-            self.context.pop_scope("navbar")
+        :param node: The |compact_paragraph| document node
+        """
+        if NAVBAR_ATTR in node and node[NAVBAR_ATTR]:
+            self.context.push_scope(NAVBAR_SCOPE)
 
-    def visit_document(self, node):
-        """"""
+    def depart_compact_paragraph(self, node: "Element") -> None:
+        """
+        Finish the translation of the |compact_paragraph| document node.
+
+        :param node: The |compact_paragraph| document node
+        """
+        if NAVBAR_ATTR in node and node[NAVBAR_ATTR]:
+            self.context.pop_scope(NAVBAR_SCOPE)
+
+    def visit_document(self, node: "document") -> None:
+        """
+        Start the translation of the |document|.
+
+        :param node: The |document| node
+        """
         self.document_root = node
         self.is_partial_node = is_partial_node(node)
 
-    def depart_document(self, node):
-        """"""
+    def depart_document(self, unused_node: "document") -> None:
+        """
+        Finish the translation of the |document|.
+
+        :param unused_node: The |document| node
+        :raises .UnprocessedPendingIdsError: when there are pending ids
+            remaining at the end of the document, most probably generated by
+            local references pointing to nowhere
+        """
         if len(self.pending_ids) > 0:
             raise UnprocessedPendingIdsError(self.pending_ids)
         self.ship_body()
 
-    def visit_list_item(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def visit_list_item(self, node: "Element") -> None:
+        """
+        Start the translation of the |list_item| document node.
+
+        :param node: The |list_item| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
         self.dump_inline_elements()
         self.start_tag("li")
-        node["last_char"] = len(self.body) - 1
+        node[LAST_CHAR_ATTR] = len(self.body) - 1
         self.context.push_node(node)
 
-    def depart_list_item(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def depart_list_item(self, node: "Element") -> None:
+        """
+        Finish the translation of the |list_item| document node.
+
+        :param node: The |list_item| document node
+        :raises .BrokenBodyError: when the internal structure of
+            :attr:`~.HtmlTranslatorBase.body` has been broken during the
+            translation
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
-        inline = 0
-        if node["last_char"] == len(self.body) - 1:
-            # We have only pending inline elements
-            container = []
+        inline: int = 0
+        if node[LAST_CHAR_ATTR] == len(self.body) - 1:
+            # Nothing was contributed to the body yet which means we have only
+            # pending inline elements
+            container: "MutableSequence[str]" = []
             self.dump_inline_elements(container)
-            # Now `container` should be populated with indented lines
+            # Now `container` is possibly populated with indented lines
+            # containing only inline elements
             if len(container) <= 1:
-                # The case `INDENT "<li>" INLINE_CDATA? "</li>" "\n"`
+                # Here we have no data or we have just one line. We need to
+                # transform
+                #   * no data to `INDENT "<li>" "</li>" "\n"`
+                #   * `INDENT INLINE_CDATA` to
+                #     `INDENT "<li>" INLINE_CDATA "</li>" "\n"`
+                # before the return from the method which means we need to take
+                # two steps:
+                #   1. remove `\n` after `<li>`
+                #   2. strip possible white space characters around
+                #      `INLINE_CDATA`
                 inline = 1
                 self.html_indent_level -= 1
+                # Strip the new line added by `start_tag("li")` as we need to
+                # append inline elements right after the `<li>` tag. If there
+                # is no new line, something went wrong with the `start_tag`
+                # logic
                 if self.body.pop(-1) != "\n":
                     raise BrokenBodyError("Expected newline character")
+                # Strip possible white space characters around `INLINE_CDATA`
                 if container:
                     container[0] = container[0].strip()
             self.contribute("".join(container))
@@ -1082,35 +1111,51 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.context.pop_node(node)
         self.end_tag("li", inline=inline)
 
-    def visit_paragraph(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def visit_paragraph(self, node: "Element") -> None:
+        """
+        Start the translation of the |paragraph| document node.
+
+        :param node: The |paragraph| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
         self.dump_inline_elements()
         self.start_tag("p")
         self.context.push_node(node)
 
-    def depart_paragraph(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def depart_paragraph(self, node: "Element") -> None:
+        """
+        Finish the translation of the |paragraph| document node.
+
+        :param node: The |paragraph| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
         self.dump_inline_elements()
         self.context.pop_node(node)
         self.end_tag("p")
 
-    def visit_reference(self, node):
-        """"""
-        href = ""
-        if "refuri" in node:
-            href = node["refuri"] or "#"
-        elif "refid" in node:
-            href = f"#{self.translate_id(node['refid'])}"
+    def visit_reference(self, node: "Element") -> None:
+        """
+        Start the translation of the |reference| document node.
+
+        :param node: The |reference| document node
+        :raises .MissingRefError: when :xarg:`node` has neither ``refuri`` nor
+            ``refid`` attribute
+        """
+        href: str = ""
+        if REFURI_ATTR in node:
+            href = node[REFURI_ATTR] or "#"
+        elif REFID_ATTR in node:
+            href = f"#{self.translate_id(node[REFID_ATTR])}"
         if not href:
             raise MissingRefError(node)
 
-        if self.context.scope("navbar"):
+        container: "MutableSequence[str] | None"
+        inline: int
+        if self.context.in_scope(NAVBAR_SCOPE):
             container = None
             inline = 1
         else:
@@ -1120,12 +1165,18 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.start_tag("a", container=container, inline=inline, a_href=href)
         self.context.push_node(node)
 
-    def depart_reference(self, node):
-        """"""
-        content = self.context.get_content(True)
+    def depart_reference(self, node: "Element") -> None:
+        """
+        Finish the translation of the |reference| node.
+
+        :param node: The |reference| document node
+        """
+        content: str = self.context.get_content(True)
         self.context.pop_node(node)
 
-        if self.context.scope("navbar"):
+        container: "MutableSequence[str] | None"
+        inline: int
+        if self.context.in_scope(NAVBAR_SCOPE):
             container = None
             inline = 1
         else:
@@ -1135,57 +1186,103 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.contribute(content, container=container)
         self.end_tag("a", container=container, inline=inline)
 
-    def visit_section(self, node):
-        """"""
+    def visit_section(self, node: section) -> None:
+        """
+        Start the translation of the |section| document node.
+
+        :param node: The |section| document node
+        """
         self.dump_inline_elements()
         self.collect_ids(node)
-        self.start_tag("section", a_id=self.get_id(node))
+        self.start_tag("section", a_id=get_id(node))
         self.context.push_section(node)
 
-    def depart_section(self, node):
-        """"""
+    def depart_section(self, node: section) -> None:
+        """
+        Finish the translation of the |section| document node.
+
+        :param node: The |section| document node
+        """
         self.dump_inline_elements()
         self.context.pop_section(node)
         self.end_tag("section")
 
-    def visit_substitution_definition(self, node):
-        """"""
+    @staticmethod
+    def visit_substitution_definition(unused_node: "Element") -> None:
+        """
+        Start the translation of the |substitution_definition| document node.
+
+        :param unused_node: The |substitution_definition| document node
+
+        This node and all its children is actually skipped.
+        """
         raise SkipChildren
 
-    def depart_substitution_definition(self, node):
-        """"""
+    @staticmethod
+    def depart_substitution_definition(unused_node: "Element") -> None:
+        """
+        Finish the translation of the |substitution_definition| document node.
 
-    def visit_target(self, node):
-        """"""
+        :param unused_node: The |substitution_definition| document node
+        """
+
+    @staticmethod
+    def visit_target(unused_node: "Element") -> None:
+        """
+        Start the translation of the |target| document node.
+
+        :param unused_node: The |target| document node
+
+        This node and all its children is actually skipped.
+        """
         raise SkipChildren
 
-    def depart_target(self, node):
-        """"""
+    @staticmethod
+    def depart_target(unused_node: "Element") -> None:
+        """
+        Finish the translation of the |target| document node.
 
-    def visit_title(self, node):
-        """"""
-        if self.context.scope("navbar"):
+        :param unused_node: The |target| document node
+        """
+
+    def visit_title(self, node: "Element") -> None:
+        """
+        Start the translation of the |title| document node.
+
+        :param node: The |title| document node
+
+        This node and all its children is skipped while translating a
+        navigation bar.
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             raise SkipChildren
 
         self.dump_inline_elements()
         self.context.push_node(node)
 
-    def depart_title(self, node):
-        """"""
-        if self.context.scope("navbar"):
+    def depart_title(self, node: "Element") -> None:
+        """
+        Finish the translation of the |title| document node.
+
+        :param node: The |title| document node
+        """
+        if self.context.in_scope(NAVBAR_SCOPE):
             return
 
-        title_text = self.context.get_content(True)
+        title_text: str = self.context.get_content(True)
         self.context.pop_node(node)
 
-        section_level = (
-            self.context.get_section_level() if not self.is_partial_node else 1
+        section_level: int = min(
+            (
+                self.context.get_section_level()
+                if not self.is_partial_node
+                else 1
+            ),
+            MAX_HTML_HEADER_LEVEL,
         )
-        if section_level > MAX_HTML_HEADER_LEVEL:
-            section_level = MAX_HTML_HEADER_LEVEL
         if section_level == 1:
             self.add_title(title_text)
-        section_id = (
+        section_id: "str | None" = (
             self.context.get_section_id() if not self.is_partial_node else None
         )
 
@@ -1195,18 +1292,29 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.end_tag(f"h{section_level}", inline=1)
         if (
             section_level == 1
+            and self.document_root is not None
             and is_index(self.document_root, self.config)
             and self.config.description
         ):
             self.start_tag("div", a_class="right-quote")
             self.contribute(
-                f"{html_escape(self.config.description)}\n", indent=True
+                f"{html_escape(self.config.description)}\n",
+                indent=True,
             )
             self.end_tag("div")
 
-    def visit_Text(self, node):
-        """"""
+    def visit_Text(self, node: "Text") -> None:
+        """
+        Start the translation of the |Text| document node.
+
+        :param node: The |Text| document node
+        """
         self.context.contribute(html_escape(node.astext()))
 
-    def depart_Text(self, node):
-        """"""
+    @staticmethod
+    def depart_Text(unused_node: "Text") -> None:
+        """
+        Finish the translation of the |Text| document node.
+
+        :param unused_node: The |Text| document node
+        """

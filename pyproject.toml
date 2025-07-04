@@ -27,6 +27,9 @@ line_length = 79
 load-plugins = ["pylint_per_file_ignores"]
 ignore-patterns = ["^\\.#", "^.*\\.pyi"]
 
+[tool.pylint.basic]
+method-rgx = "^([a-z_][0-9a-z_]{2,}|(visit_|depart_)[0-9A-Za-z_]{2,})$"
+
 [tool.pylint.design]
 min-public-methods = 0
 
@@ -40,6 +43,8 @@ disable = ["no-member"]
 per-file-ignores = [
     # Disable checks on Sphinx configuration options
     "docs/conf.py:invalid-name,redefined-builtin",
+    # Sphinx translators are huge by design
+    "src/sphinx_abcdoc_theme/writer.py:too-many-lines,too-many-public-methods",
 ]
 
 [tool.pylint.similarities]

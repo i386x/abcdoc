@@ -9,35 +9,47 @@
 """
 Utilities.
 
-.. _document node: https://docutils.sourceforge.io/docs/ref/doctree.html
-
-.. |document node| replace:: `document node`_
+.. include:: defs.inc
 """
 
+import abc
 import re
 from typing import TYPE_CHECKING, cast
-
-from docutils.nodes import Text
 
 if TYPE_CHECKING:
     import logging
     from collections.abc import Iterator, Mapping, Sequence, Set
+    from typing import Literal
 
-    from docutils.nodes import Node
+    from sphinx_abcdoc_theme import Node, StrPath, Text
+else:
+    from docutils.nodes import Text
 
-    from sphinx_abcdoc_theme import NodeP
+#: The name of ``caption`` attribute
+CAPTION_ATTR: "Literal['caption']" = "caption"
+#: The name of ``classes`` attribute
+CLASSES_ATTR: "Literal['classes']" = "classes"
+#: The name of ``ids`` attribute
+IDS_ATTR: "Literal['ids']" = "ids"
+#: The name of ``last_char`` attribute
+LAST_CHAR_ATTR: "Literal['last_char']" = "last_char"
+#: The name of ``names`` attribute
+NAMES_ATTR: "Literal['names']" = "names"
+#: The name of ``navbar`` attribute
+NAVBAR_ATTR: "Literal['navbar']" = "navbar"
+#: The name of ``refid`` attribute
+REFID_ATTR: "Literal['refid']" = "refid"
+#: The name of ``refuri`` attribute
+REFURI_ATTR: "Literal['refuri']" = "refuri"
+#: The name of ``source`` attribute
+SOURCE_ATTR: "Literal['source']" = "source"
 
-#: The ``attributes`` keyword
-ATTRIBUTES_KW: str = "attributes"
-
+#: The name of ``attributes`` attribute
+ATTRIBUTES_ATTR: str = "attributes"
+#: The ``filename`` attribute name
+FILENAME_ATTR: str = "filename"
 #: The name of ``tagname`` attribute
 TAGNAME_ATTR: str = "tagname"
-#: The name of ``navbar`` attribute
-NAVBAR_ATTR: str = "navbar"
-#: The name of ``source`` attribute
-SOURCE_ATTR: str = "source"
-#: The name of ``ids`` attribute
-IDS_ATTR: str = "ids"
 
 #: The regular expression matching a non-empty sequence of white-space
 #: characters
@@ -48,12 +60,12 @@ WS_RE: "re.Pattern[str]" = re.compile(r"\s+")
 WORD_TOKENIZER_RE: "re.Pattern[str]" = re.compile(r"\s+|\S+")
 #: The regular expression matching one of:
 #:
-#:   #. a non-empty sequence of white-space characters
-#:   #. a non-empty sequence of words and/or tags, where
+#: #. a non-empty sequence of white-space characters
+#: #. a non-empty sequence of words and/or tags, where
 #:
-#:      * a *word* is a non-empty sequence of non-white-space characters
-#:      * a *tag* is a sequence of characters between ``<`` and ``>``,
-#:        including ``<`` and ``>``
+#:    * a *word* is a non-empty sequence of non-white-space characters
+#:    * a *tag* is a sequence of characters between ``<`` and ``>``,
+#:      including ``<`` and ``>``
 #:
 HTML_WORD_TOKENIZER_RE: "re.Pattern[str]" = re.compile(r"\s+|(<[^>]*>|\S+)+")
 
@@ -74,35 +86,77 @@ LOG_INDENT_STRIDE: int = 2
 #: The list of a |document node| attributes that should be included in debug
 #: log messages
 NODE_ATTRIBUTES: "Sequence[str]" = (
-    "rawsource",
-    ATTRIBUTES_KW,
-    "current_source",
+    ATTRIBUTES_ATTR,
+    "autofootnote_refs",
+    "autofootnote_start",
+    "autofootnotes",
+    "citation_refs",
+    "citations",
     "current_line",
+    "current_source",
+    "footnote_refs",
+    "footnotes",
+    IDS_ATTR,
     "indirect_targets",
-    "substitution_names",
-    "refnames",
-    "refids",
+    LAST_CHAR_ATTR,
     "nameids",
     "nametypes",
-    IDS_ATTR,
-    "footnote_refs",
-    "citation_refs",
-    "autofootnotes",
-    "autofootnote_refs",
-    "symbol_footnotes",
-    "symbol_footnote_refs",
-    "footnotes",
-    "citations",
-    "autofootnote_start",
-    "symbol_footnote_start",
-    "toctree",
     NAVBAR_ATTR,
+    "rawsource",
+    REFID_ATTR,
+    "refids",
+    "refnames",
+    REFURI_ATTR,
+    "substitution_names",
+    "symbol_footnote_refs",
+    "symbol_footnote_start",
+    "symbol_footnotes",
+    "toctree",
 )
 #: The set of |document node| attributes that are actually attribute
 #: containers, holding other set of attributes together with their values.
 #: Attributes from these containers should also be included in debug log
 #: messages
-NODE_ATTRIBUTES_CONTAINERS: "Set[str]" = {ATTRIBUTES_KW}
+NODE_ATTRIBUTES_CONTAINERS: "Set[str]" = {ATTRIBUTES_ATTR}
+
+
+class FileAsset(metaclass=abc.ABCMeta):
+    """
+    An abstract base class for file assets.
+
+    Provides the interface that every file asset must implement. Can be used
+    with :func:`isinstance` and :func:`issubclass` to test whether the
+    candidate class implements the interface.
+    """
+
+    __slots__ = ()
+
+    @property
+    @abc.abstractmethod
+    def filename(self) -> "StrPath":
+        """
+        Return the file path.
+
+        :return: the file path
+        """
+        return ""
+
+    @classmethod
+    def __subclasshook__(cls, subcls: "type[FileAsset]") -> bool:
+        """
+        Check whether :xarg:`subcls` is considered a subclass of this ABC.
+
+        :param subcls: The candidate subclass
+        :return: :obj:`True` if :xarg:`subcls` is considered a subclass of this
+            abstract base class (ABC)
+        """
+        if cls is FileAsset:
+            if any(
+                FILENAME_ATTR in cast("Mapping[str, object]", supcls.__dict__)
+                for supcls in subcls.__mro__
+            ):
+                return True
+        return cast(bool, NotImplemented)
 
 
 def html_escape(text: str) -> str:
@@ -180,7 +234,7 @@ def wrap(
     text: str,
     limit: int = 79,
     indent: int = 0,
-    tokenizer_re: "re.Pattern[str] | None" = None,
+    tokenizer: "re.Pattern[str] | None" = None,
 ) -> "Iterator[str]":
     """
     Break text into lines of length close to the limit.
@@ -188,19 +242,19 @@ def wrap(
     :param text: The text to be wrapped
     :param limit: The requested line length, including line indentation
     :param indent: The indentation length of every line
-    :param tokenizer_re: The compiled regular expression used to split
+    :param tokenizer: The compiled regular expression used to split
         :xarg:`text` into words (the default is :const:`.WORD_TOKENIZER_RE`)
     :return: the sequence of lines
 
     :xarg:`text` is broken into lines, where the length of each line plus
-    :xarg:`indent` is as close to :xarg:`limit` as possible.
-    :xarg:`tokenizer_re` controls how :xarg:`text` is broken into words from
-    which a line is formed. A line break is never taken inside a word.
+    :xarg:`indent` is as close to :xarg:`limit` as possible. :xarg:`tokenizer`
+    controls how :xarg:`text` is broken into words from which a line is formed.
+    A line break is never taken inside a word.
     """
-    if tokenizer_re is None:
-        tokenizer_re = WORD_TOKENIZER_RE
+    if tokenizer is None:
+        tokenizer = WORD_TOKENIZER_RE
     line: str = ""
-    for word in tokenize(text, tokenizer_re):
+    for word in tokenize(text, tokenizer):
         nspaces: int = indent if len(line) == 0 else 1
         word = indent_text(word, nspaces)
         if limit - len(line) >= (len(word) + 1) // 2 or len(line) == 0:
@@ -213,7 +267,7 @@ def wrap(
 
 
 def node_attribute_as_str(
-    node: "NodeP",
+    node: "Node",
     attr: str,
     level: int,
     prefix: str = "",
@@ -255,7 +309,7 @@ def node_attribute_as_str(
     return result
 
 
-def tagname(node: "NodeP") -> str:
+def tagname(node: "Node") -> str:
     """
     Get the tag name associated with the node, if any.
 
@@ -264,13 +318,13 @@ def tagname(node: "NodeP") -> str:
 
     If :xarg:`node` has no tag name associated with, use its class name.
     """
-    return cast(
-        str, getattr(node, TAGNAME_ATTR, f"#node:{type(node).__name__}")
-    )
+    if not hasattr(node, TAGNAME_ATTR) or node.tagname is None:
+        return f"#node:{type(node).__name__}"
+    return node.tagname
 
 
 def log_node_start(
-    node: "NodeP",
+    node: "Node",
     level: int,
     logger: "logging.LoggerAdapter[logging.Logger]",
 ) -> None:
@@ -288,7 +342,7 @@ def log_node_start(
     message: str = indent_text(
         f"<{tagname(node)}", level, stride=LOG_INDENT_STRIDE
     )
-    if isinstance(cast("Node", node), Text):
+    if isinstance(node, Text):
         message += f" {node}"
     for attr in NODE_ATTRIBUTES:
         message += node_attribute_as_str(node, attr, level + 1, prefix="\n")
@@ -297,7 +351,7 @@ def log_node_start(
 
 
 def log_node_end(
-    node: "NodeP",
+    node: "Node",
     level: int,
     logger: "logging.LoggerAdapter[logging.Logger]",
 ) -> None:
