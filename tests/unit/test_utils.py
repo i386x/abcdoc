@@ -15,8 +15,10 @@ Test :mod:`sphinx_abcdoc_theme.utils` module.
 import re
 
 from docutils.nodes import Text
+from sphinx.builders.html._assets import _CascadingStyleSheet, _JavaScript
 from vutils.testing.mock import make_mock
 from vutils.testing.testcase import TestCase
+from vutils.testing.utils import make_type
 
 from sphinx_abcdoc_theme.utils import (
     FileAsset,
@@ -31,33 +33,27 @@ from sphinx_abcdoc_theme.utils import (
     wrap,
 )
 
-from .utils import (
-    FakeNode,
-    FileAssetImpl,
-    FileAssetLike,
-    NodeWithNoneTagname,
-    NodeWithoutTagname,
-    NodeWithTagname,
-    NoFileAsset,
-)
-
 
 class FileAssetTestCase(TestCase):
     """Test case for |FileAsset|."""
 
-    def test_abstract_method(self):
-        """Test |FileAsset.filename|."""
-        self.assertIsInstance(FileAssetImpl().filename, str)
+    __slots__ = ()
 
-    def test_subclass_hook(self):
-        """Test |FileAsset.__subclasshook__|."""
-        self.assertNotIsInstance(NoFileAsset(), FileAsset)
-        self.assertIsInstance(FileAssetLike(), FileAsset)
-        self.assertIsInstance(FileAssetImpl(), FileAsset)
+    def test_file_asset(self):
+        """Test |FileAsset|."""
+        self.assertNotIsInstance(make_type("NoFileAsset")(), FileAsset)
+        self.assertIsInstance(
+            make_type("FileAssetLike", members={"filename": "foo"})(),
+            FileAsset,
+        )
+        self.assertIsInstance(_CascadingStyleSheet("style.css"), FileAsset)
+        self.assertIsInstance(_JavaScript("script.js"), FileAsset)
 
 
 class HtmlEscapeTestCase(TestCase):
     """Test case for |html_escape|."""
+
+    __slots__ = ()
 
     def test_html_escape(self):
         """Test |html_escape|."""
@@ -68,6 +64,8 @@ class HtmlEscapeTestCase(TestCase):
 
 class IndentationTestCase(TestCase):
     """Test case for indentation functions."""
+
+    __slots__ = ()
 
     def test_indentation(self):
         """Test |indentation|."""
@@ -97,6 +95,8 @@ class IndentationTestCase(TestCase):
 class TokenizeTestCase(TestCase):
     """Test case for |tokenize|."""
 
+    __slots__ = ()
+
     def test_tokenize(self):
         """Test |tokenize|."""
         tokenizer = re.compile(r"[a-z]+|\s+")
@@ -113,6 +113,8 @@ class TokenizeTestCase(TestCase):
 
 class WrapTestCase(TestCase):
     """Test case for |wrap|."""
+
+    __slots__ = ()
 
     def test_wrap(self):
         """Test |wrap|."""
@@ -140,48 +142,74 @@ class WrapTestCase(TestCase):
 class NodeLoggingTestCase(TestCase):
     """Test case for |Node| logging functions."""
 
+    __slots__ = (
+        "fake_node",
+        "node_without_tagname",
+        "node_with_none_tagname",
+        "node_with_tagname",
+    )
+
+    def setUp(self):
+        """Set up the test."""
+        self.fake_node = make_type(
+            "FakeNode",
+            members={
+                "tagname": "fake",
+                "attributes": {"source": "index.rst"},
+                "current_line": 42,
+            },
+        )()
+        self.node_without_tagname = make_type("NodeWithoutTagname")()
+        self.node_with_none_tagname = make_type(
+            "NodeWithNoneTagname", members={"tagname": None}
+        )()
+        self.node_with_tagname = make_type(
+            "NodeWithTagname", members={"tagname": "tag"}
+        )()
+
     def test_attribute_to_string(self):
         """Test an attribute to sting conversion."""
-        node = FakeNode()
-
-        self.assertEqual(node_attribute_as_str(node, "unknown", 1), "")
         self.assertEqual(
-            node_attribute_as_str(node, "unknown", 1, "(", ")"), ""
+            node_attribute_as_str(self.fake_node, "unknown", 1), ""
         )
         self.assertEqual(
-            node_attribute_as_str(node, "current_line", 1),
+            node_attribute_as_str(self.fake_node, "unknown", 1, "(", ")"), ""
+        )
+        self.assertEqual(
+            node_attribute_as_str(self.fake_node, "current_line", 1),
             "  current_line: 42",
         )
         self.assertEqual(
-            node_attribute_as_str(node, "current_line", 1, "(", ")"),
+            node_attribute_as_str(self.fake_node, "current_line", 1, "(", ")"),
             "(  current_line: 42)",
         )
         self.assertEqual(
-            node_attribute_as_str(node, "attributes", 1), "  source: index.rst"
+            node_attribute_as_str(self.fake_node, "attributes", 1),
+            "  source: index.rst",
         )
         self.assertEqual(
-            node_attribute_as_str(node, "attributes", 1, "(", ")"),
+            node_attribute_as_str(self.fake_node, "attributes", 1, "(", ")"),
             "(  source: index.rst)",
         )
 
     def test_tagname(self):
         """Test the |tagname| helper."""
         self.assertEqual(
-            tagname(NodeWithoutTagname()), "#node:NodeWithoutTagname"
+            tagname(self.node_without_tagname), "#node:NodeWithoutTagname"
         )
         self.assertEqual(
-            tagname(NodeWithNoneTagname()), "#node:NodeWithNoneTagname"
+            tagname(self.node_with_none_tagname), "#node:NodeWithNoneTagname"
         )
-        self.assertEqual(tagname(NodeWithTagname()), "tag")
+        self.assertEqual(tagname(self.node_with_tagname), "tag")
 
     def test_node_logging(self):
         """Test |log_node_start| and |log_node_end|."""
         logger = make_mock(["debug"])
 
-        log_node_start(NodeWithTagname(), 1, logger)
+        log_node_start(self.node_with_tagname, 1, logger)
         self.assert_called_with(logger.debug, "%s", "  <tag>")
 
-        log_node_start(FakeNode(), 1, logger)
+        log_node_start(self.fake_node, 1, logger)
         self.assert_called_with(
             logger.debug,
             "%s",
@@ -191,5 +219,5 @@ class NodeLoggingTestCase(TestCase):
         log_node_start(Text("Hello!"), 1, logger)
         self.assert_called_with(logger.debug, "%s", "  <#text Hello!>")
 
-        log_node_end(FakeNode(), 1, logger)
+        log_node_end(self.fake_node, 1, logger)
         self.assert_called_with(logger.debug, "%s</%s>", "  ", "fake")

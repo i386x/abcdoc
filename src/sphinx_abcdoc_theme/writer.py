@@ -12,6 +12,7 @@ HTML writer.
 .. include:: defs.inc
 """
 
+import logging
 import pathlib
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, cast
@@ -37,7 +38,6 @@ from sphinx_abcdoc_theme.utils import (
 from sphinx_abcdoc_theme.utils import wrap as wrap_func
 
 if TYPE_CHECKING:
-    import logging
     from collections.abc import (
         Mapping,
         MutableMapping,
@@ -179,16 +179,21 @@ class MissingIdsError(ThemeError):
         ThemeError.__init__(self, f"`{node}` has no {IDS_ATTR}")
 
 
-def check_ids(node: "Element") -> None:
+def check_ids(node: "Element", throw: bool = True) -> bool:
     """
-    Check whether the node contains the ``ids`` attribute.
+    Check whether the node contains one or more ids.
 
     :param node: The document node
-    :raises .MissingIdsError: when :xarg:`node` does not contain ``ids``
-        attribute
+    :param throw: The "raise an exception" flag
+    :return: :obj:`True` if :xarg:`node` has one or more ids
+    :raises .MissingIdsError: when :xarg:`node` does not have any id and
+        simultaneously :xarg:`throw` is set to :obj:`True`
     """
     if IDS_ATTR not in node or len(node[IDS_ATTR]) == 0:
-        raise MissingIdsError(node)
+        if throw:
+            raise MissingIdsError(node)
+        return False
+    return True
 
 
 def get_id(node: "Element") -> str:
@@ -218,6 +223,19 @@ class ConflictingIdError(ThemeError):
         ThemeError.__init__(self, f"Id `{cid}` from `{node}` already used")
 
 
+def ids2str(ids: "Iterable[str]") -> str:
+    """
+    Convert a container with ids to the pretty string.
+
+    :param ids: The container with ids
+    :return: the ids in pretty format
+
+    The *pretty format* means that ids are sorted, not enclosed inside quotes,
+    and joined together with ``, `` separator.
+    """
+    return ", ".join(sorted(ids))
+
+
 class AmbiguousIdsError(ThemeError):
     """
     Signalizes that two or more ids are in a conflict.
@@ -236,7 +254,11 @@ class AmbiguousIdsError(ThemeError):
         :param ids: The list of ids
         """
         ThemeError.__init__(
-            self, f"More than 1 ids ({ids}) are trying to reference `{node}`"
+            self,
+            (
+                f"More than 1 ids ({ids2str(ids)}) "
+                f"are trying to reference `{node}`"
+            ),
         )
 
 
@@ -251,7 +273,7 @@ class UnprocessedPendingIdsError(ThemeError):
 
         :param ids: The list of ids
         """
-        ThemeError.__init__(self, f"Unprocessed pending ids: {ids}")
+        ThemeError.__init__(self, f"Unprocessed pending ids: {ids2str(ids)}")
 
 
 class MissingRefError(ThemeError):
@@ -362,7 +384,10 @@ class Context:
         Push the scope.
 
         :param scope: The scope
+        :raises .ContextError: when :xarg:`scope` is already on the stack
         """
+        if self.in_scope(scope):
+            raise ContextError(f"Scope `{scope}` is already on the stack")
         self.scope_stack.append(scope)
 
     def pop_scope(self, scope: str) -> None:
@@ -394,7 +419,10 @@ class Context:
         Push the document node.
 
         :param node: The document node
+        :raises .ContextError: when :xarg:`node` is already on the stack
         """
+        if node in self.node_stack:
+            raise ContextError(f"Node `{node}` is already on the stack")
         self.node_stack.append(node)
         self.node2fragment[node] = []
 
@@ -407,7 +435,7 @@ class Context:
             match with :xarg:`node`
         """
         self.check_node_stack()
-        self.check_identity(node, self.node_stack[-1])
+        self.check_identity(self.node_stack[-1], node)
         self.node_stack.pop(-1)
         del self.node2fragment[node]
 
@@ -432,7 +460,7 @@ class Context:
             not match with :xarg:`node`
         """
         self.check_section_stack()
-        self.check_identity(node, self.section_stack[-1])
+        self.check_identity(self.section_stack[-1], node)
         self.section_stack.pop(-1)
         self.pop_node(node)
 
@@ -555,6 +583,8 @@ class HtmlTranslatorBase(SphinxTranslator):
         """
         SphinxTranslator.__init__(self, document, builder)
         self.logger = getLogger(__name__)
+        if self.config.abcdoc_debug:
+            self.logger.setLevel(logging.DEBUG)
         self.log_indent_level = 0
         self.html_indent_level = HTML_INDENT_BASE
         self.body = []
@@ -646,7 +676,7 @@ class HtmlTranslatorBase(SphinxTranslator):
             for line in wrap_func(
                 text,
                 indent=indent_level * HTML_INDENT_STRIDE,
-                tokenizer_re=HTML_WORD_TOKENIZER_RE,
+                tokenizer=HTML_WORD_TOKENIZER_RE,
             ):
                 container.append(line)
         else:
@@ -899,17 +929,17 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.document_root = None
         self.is_partial_node = False
 
-    def candidate_id(self, node: "Element") -> str:
+    def candidate_id(self, node: "Element") -> "str | None":
         """
         Select the candidate id for the node.
 
         :param node: The document node
-        :return: the candidate id
-        :raises ~.MissingIdsError: when :xarg:`node` has no ids
+        :return: the candidate id or :obj:`None` if there are no candidates
         :raises ~.AmbiguousIdsError: when :xarg:`node` has more than one
             candidate id
         """
-        check_ids(node)
+        if not check_ids(node, throw=False):
+            return None
         common: "set[str]" = self.pending_ids & set(node[IDS_ATTR])
         if len(common) > 1:
             raise AmbiguousIdsError(node, common)
@@ -930,7 +960,9 @@ class HtmlTranslator(HtmlTranslatorBase):
 
         Collect all ids of :xarg:`node` and map them to its candidate id.
         """
-        id0: str = self.candidate_id(node)
+        id0: "str | None" = self.candidate_id(node)
+        if id0 is None:
+            return
         for idn in node[IDS_ATTR]:
             if idn in self.id2id:
                 raise ConflictingIdError(node, idn)
@@ -1009,6 +1041,25 @@ class HtmlTranslator(HtmlTranslatorBase):
         self.dump_inline_elements()
         self.context.pop_node(node)
         self.end_tag("ul")
+
+    @staticmethod
+    def visit_comment(unused_node: "Element") -> None:
+        """
+        Start the translation of the |comment| document node.
+
+        :param unused_node: The |comment| document node
+
+        This node and all its children is actually skipped.
+        """
+        raise SkipChildren
+
+    @staticmethod
+    def depart_comment(unused_node: "Element") -> None:
+        """
+        Finish the translation of the |comment| document node.
+
+        :param unused_node: The |comment| document node
+        """
 
     def visit_compact_paragraph(self, node: "Element") -> None:
         """
@@ -1121,6 +1172,7 @@ class HtmlTranslator(HtmlTranslatorBase):
             return
 
         self.dump_inline_elements()
+        self.collect_ids(node)
         self.start_tag("p")
         self.context.push_node(node)
 

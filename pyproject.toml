@@ -45,6 +45,9 @@ per-file-ignores = [
     "docs/conf.py:invalid-name,redefined-builtin",
     # Sphinx translators are huge by design
     "src/sphinx_abcdoc_theme/writer.py:too-many-lines,too-many-public-methods",
+    "tests/unit/test_writer.py:too-many-lines",
+    # Allow access to protected members in tests
+    "tests/unit/utils.py:protected-access",
 ]
 
 [tool.pylint.similarities]

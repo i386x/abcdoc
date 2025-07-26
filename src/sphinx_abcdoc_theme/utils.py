@@ -120,43 +120,37 @@ NODE_ATTRIBUTES: "Sequence[str]" = (
 NODE_ATTRIBUTES_CONTAINERS: "Set[str]" = {ATTRIBUTES_ATTR}
 
 
-class FileAsset(metaclass=abc.ABCMeta):
+class FileAssetMeta(abc.ABCMeta):
     """
-    An abstract base class for file assets.
+    File asset meta class.
 
-    Provides the interface that every file asset must implement. Can be used
-    with :func:`isinstance` and :func:`issubclass` to test whether the
-    candidate class implements the interface.
+    A file asset is any object with ``filename`` attribute.
     """
 
     __slots__ = ()
 
-    @property
-    @abc.abstractmethod
-    def filename(self) -> "StrPath":
+    def __instancecheck__(cls, instance: object) -> bool:
         """
-        Return the file path.
+        Check whether :xarg:`instance` is a file asset.
 
-        :return: the file path
+        :param instance: The instance of inspected class
+        :return: :obj:`True` if :xarg:`instance` is a file asset
         """
-        return ""
+        return hasattr(instance, FILENAME_ATTR)
 
-    @classmethod
-    def __subclasshook__(cls, subcls: "type[FileAsset]") -> bool:
-        """
-        Check whether :xarg:`subcls` is considered a subclass of this ABC.
 
-        :param subcls: The candidate subclass
-        :return: :obj:`True` if :xarg:`subcls` is considered a subclass of this
-            abstract base class (ABC)
-        """
-        if cls is FileAsset:
-            if any(
-                FILENAME_ATTR in cast("Mapping[str, object]", supcls.__dict__)
-                for supcls in subcls.__mro__
-            ):
-                return True
-        return cast(bool, NotImplemented)
+class FileAsset(metaclass=FileAssetMeta):
+    """
+    A file asset type.
+
+    Used to check whether some object is a file asset during runtime via
+    ``isinstance(obj, FileAsset)``.
+    """
+
+    #: The file name
+    filename: "StrPath"
+
+    __slots__ = ("filename",)
 
 
 def html_escape(text: str) -> str:
