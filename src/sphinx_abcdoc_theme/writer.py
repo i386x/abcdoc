@@ -1026,6 +1026,7 @@ class HtmlTranslator(HtmlTranslatorBase):
             return
 
         self.dump_inline_elements()
+        self.collect_ids(node)
         self.start_tag("ul")
         self.context.push_node(node)
 
@@ -1069,6 +1070,7 @@ class HtmlTranslator(HtmlTranslatorBase):
         """
         if NAVBAR_ATTR in node and node[NAVBAR_ATTR]:
             self.context.push_scope(NAVBAR_SCOPE)
+        self.collect_ids(node)
 
     def depart_compact_paragraph(self, node: "Element") -> None:
         """
@@ -1087,6 +1089,7 @@ class HtmlTranslator(HtmlTranslatorBase):
         """
         self.document_root = node
         self.is_partial_node = is_partial_node(node)
+        self.collect_ids(node)
 
     def depart_document(self, unused_node: "document") -> None:
         """
@@ -1111,6 +1114,7 @@ class HtmlTranslator(HtmlTranslatorBase):
             return
 
         self.dump_inline_elements()
+        self.collect_ids(node)
         self.start_tag("li")
         node[LAST_CHAR_ATTR] = len(self.body) - 1
         self.context.push_node(node)
@@ -1197,6 +1201,8 @@ class HtmlTranslator(HtmlTranslatorBase):
         :raises .MissingRefError: when :xarg:`node` has neither ``refuri`` nor
             ``refid`` attribute
         """
+        self.collect_ids(node)
+
         href: str = ""
         if REFURI_ATTR in node:
             href = node[REFURI_ATTR] or "#"
@@ -1310,6 +1316,7 @@ class HtmlTranslator(HtmlTranslatorBase):
             raise SkipChildren
 
         self.dump_inline_elements()
+        self.collect_ids(node)
         self.context.push_node(node)
 
     def depart_title(self, node: "Element") -> None:

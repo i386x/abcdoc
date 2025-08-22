@@ -119,7 +119,8 @@ class ModulePatcher(PatcherFactory):
     """
     Patch modules.
 
-    Temporarily patch :mod:`sphinx_abcdoc_theme.writer`.
+    Temporarily patch :mod:`sphinx_abcdoc_theme.writer` and
+    :mod:`sphinx.util.docutils`.
     """
 
     __slots__ = ("logs", "logger")
@@ -129,15 +130,17 @@ class ModulePatcher(PatcherFactory):
         #: The container for recording logs
         self.logs = []
         #: The logger mock
-        self.logger = make_mock(["setLevel", "debug"])
+        self.logger = make_mock(["setLevel", "debug", "warning"])
         self.logger.debug = make_callable(
             lambda *args, **kwargs: self.logs.append((args, kwargs))
         )
+        self.logger.warning = self.logger.debug
 
         self.add_spec(
             "sphinx_abcdoc_theme.writer.getLogger",
             new=make_callable(lambda *args: self.logger),
         )
+        self.add_spec("sphinx.util.docutils.logger", new=self.logger)
 
 
 def make_registry():

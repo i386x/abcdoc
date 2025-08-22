@@ -28,7 +28,12 @@ from sphinx.transforms import SphinxTransform
 from vutils.testing.testcase import TestCase
 from vutils.yaml.load import load_yaml
 
-from sphinx_abcdoc_theme.utils import IDS_ATTR, LAST_CHAR_ATTR
+from sphinx_abcdoc_theme.utils import (
+    IDS_ATTR,
+    LAST_CHAR_ATTR,
+    NODE_ATTRIBUTES,
+    node_attribute_as_str,
+)
 from sphinx_abcdoc_theme.writer import (
     NAVBAR_SCOPE,
     PARTIAL_NODE_NAME,
@@ -886,6 +891,7 @@ class HtmlTranslatorBaseTestCase(TestCase):
         """Test |HtmlTranslatorBase.__getattr__|."""
         with self.patcher.patch():
             translator = HtmlTranslatorBase(self.document, self.app.builder)
+
             self.assertEqual(translator.body_prefix, [])
             self.assertEqual(translator.body, [])
 
@@ -893,6 +899,7 @@ class HtmlTranslatorBaseTestCase(TestCase):
         """Test |HtmlTranslatorBase.add_title|."""
         with self.patcher.patch():
             translator = HtmlTranslatorBase(self.document, self.app.builder)
+
             self.assertEqual(translator.title, [])
             translator.add_title("title A")
             self.assertEqual(translator.title, ["title A"])
@@ -927,6 +934,7 @@ class HtmlTranslatorBaseTestCase(TestCase):
         """Test |HtmlTranslatorBase.ship_body|."""
         with self.patcher.patch():
             translator = HtmlTranslatorBase(self.document, self.app.builder)
+
             self.do_test_ship_body(translator, [], False)
             self.do_test_ship_body(translator, [], True)
             self.do_test_ship_body(
@@ -936,6 +944,47 @@ class HtmlTranslatorBaseTestCase(TestCase):
             self.do_test_ship_body(translator, ["abcdoc"], False, False)
             self.do_test_ship_body(translator, ["abcdoc"], False, erase=True)
             self.do_test_ship_body(translator, ["abcdoc"], False, True)
+
+    def do_test_container_param(
+        self, translator, func, expected, positional, **kwargs
+    ):
+        """
+        Perform a test on a function with ``container`` parameter.
+
+        :param translator: The |HtmlTranslatorBase| instance
+        :param func: The callable object that has ``container=None`` as the
+            second parameter in its signature
+        :param expected: The expected result
+        :param positional: The first argument to :xarg:`func`
+        :param kwargs: Additional key-value arguments to :xarg:`func`
+        """
+        html_indent_level = translator.html_indent_level
+
+        func(positional, **kwargs)
+        self.assertEqual(translator.astext(), expected)
+        translator.body.clear()
+
+        translator.html_indent_level = html_indent_level
+        func(positional, None, **kwargs)
+        self.assertEqual(translator.astext(), expected)
+        translator.body.clear()
+
+        translator.html_indent_level = html_indent_level
+        container = []
+        func(positional, container, **kwargs)
+        self.assertEqual("".join(container), expected)
+        self.assertEqual(translator.astext(), "")
+
+        translator.html_indent_level = html_indent_level
+        func(positional, container=None, **kwargs)
+        self.assertEqual(translator.astext(), expected)
+        translator.body.clear()
+
+        translator.html_indent_level = html_indent_level
+        container = []
+        func(positional, container=container, **kwargs)
+        self.assertEqual("".join(container), expected)
+        self.assertEqual(translator.astext(), "")
 
     def do_test_contribute(self, translator, expected, *args, **kwargs):
         """
@@ -947,135 +996,226 @@ class HtmlTranslatorBaseTestCase(TestCase):
         :param kwargs: Key-value arguments to |HtmlTranslatorBase.contribute|
         """
         translator.contribute(*args, **kwargs)
-        container = kwargs.get("container", None)
-        if len(args) >= 2:
-            container = args[1]
-        if container is None:
-            self.assertEqual(translator.body, expected)
-        else:
-            self.assertEqual(translator.body, [])
-            self.assertEqual(container, expected)
+        self.assertEqual(translator.astext(), expected)
         translator.body.clear()
 
     def test_contribute(self):
         """Test |HtmlTranslatorBase.contribute|."""
         text = (
-            'This is a story about <em class="emphasize">long paragraph</em>.'
-            ' The paragraph was so <b class="bold large">long</b> so it had'
-            ' been broken into multiple smaller <u class="underline">lines</u>'
-            "."
+            'This is a story about <em class="emphasize">long paragraph</em>'
+            '. The paragraph was so <b class="bold large">long</b> so it had b'
+            'een broken into multiple smaller <u class="underline">lines</u>.'
         )
-        wrapped = [
-            (
-                'This is a story about <em class="emphasize">long paragraph'
-                "</em>. The paragraph\n"
-            ),
-            (
-                'was so <b class="bold large">long</b> so it had been broken'
-                " into multiple smaller\n"
-            ),
-            '<u class="underline">lines</u>.\n',
-        ]
-        wrapped_indented = [
-            (
-                "    "
-                'This is a story about <em class="emphasize">long paragraph'
-                "</em>. The paragraph\n"
-            ),
-            (
-                "    "
-                'was so <b class="bold large">long</b> so it had been broken'
-                " into multiple\n"
-            ),
-            '    smaller <u class="underline">lines</u>.\n',
-        ]
+        wrapped = (
+            'This is a story about <em class="emphasize">long paragraph</em>'
+            ". The paragraph\n"
+            'was so <b class="bold large">long</b> so it had been broken int'
+            "o multiple smaller\n"
+            '<u class="underline">lines</u>.\n'
+        )
+        wrapped_indented = (
+            '    This is a story about <em class="emphasize">long paragraph'
+            "</em>. The paragraph\n"
+            '    was so <b class="bold large">long</b> so it had been broken i'
+            "nto multiple\n"
+            '    smaller <u class="underline">lines</u>.\n'
+        )
 
         with self.patcher.patch():
             translator = HtmlTranslatorBase(self.document, self.app.builder)
             translator.html_indent_level = 2
-            self.do_test_contribute(translator, [], "")
-            self.do_test_contribute(translator, [text], text)
-            self.do_test_contribute(translator, [], "", None)
-            self.do_test_contribute(translator, [text], text, None)
-            self.do_test_contribute(translator, [], "", [])
-            self.do_test_contribute(translator, [text], text, [])
-            self.do_test_contribute(translator, [], "", [], False)
-            self.do_test_contribute(translator, [text], text, [], False)
-            self.do_test_contribute(translator, [], "", [], True)
-            self.do_test_contribute(
-                translator, [f"    {text}"], text, [], True
+
+            self.do_test_container_param(
+                translator, translator.contribute, text, text
             )
-            self.do_test_contribute(translator, [], "", [], False, False)
-            self.do_test_contribute(translator, [text], text, [], False, False)
-            self.do_test_contribute(translator, [], "", [], False, True)
-            self.do_test_contribute(translator, wrapped, text, [], False, True)
-            self.do_test_contribute(translator, [], "", [], True, False)
-            self.do_test_contribute(
-                translator, [f"    {text}"], text, [], True, False
+            self.do_test_container_param(
+                translator, translator.contribute, wrapped, text, wrap=True
             )
-            self.do_test_contribute(translator, [], "", [], True, True)
+
+            self.do_test_contribute(translator, "", "")
+            self.do_test_contribute(translator, "", "", None, False)
+            self.do_test_contribute(translator, "", "", None, True)
+            self.do_test_contribute(translator, "", "", None, False, False)
+            self.do_test_contribute(translator, "", "", None, False, True)
+            self.do_test_contribute(translator, "", "", None, True, False)
+            self.do_test_contribute(translator, "", "", None, True, True)
+
+            self.do_test_contribute(translator, text, text)
+            self.do_test_contribute(translator, text, text, None, False)
             self.do_test_contribute(
-                translator, wrapped_indented, text, [], True, True
+                translator, f"    {text}", text, None, True
             )
-            self.do_test_contribute(translator, [], "", container=None)
-            self.do_test_contribute(translator, [text], text, container=None)
-            self.do_test_contribute(translator, [], "", container=[])
-            self.do_test_contribute(translator, [text], text, container=[])
+            self.do_test_contribute(translator, text, text, None, False, False)
             self.do_test_contribute(
-                translator, [], "", container=[], indent=False
+                translator, wrapped, text, None, False, True
             )
             self.do_test_contribute(
-                translator, [text], text, container=[], indent=False
+                translator, f"    {text}", text, None, True, False
             )
             self.do_test_contribute(
-                translator, [], "", container=[], indent=True
+                translator, wrapped_indented, text, None, True, True
+            )
+
+            self.do_test_contribute(translator, "", "", None, indent=False)
+            self.do_test_contribute(translator, "", "", None, indent=True)
+            self.do_test_contribute(translator, "", "", None, wrap=False)
+            self.do_test_contribute(translator, "", "", None, wrap=True)
+            self.do_test_contribute(
+                translator, "", "", None, indent=False, wrap=False
             )
             self.do_test_contribute(
-                translator, [f"    {text}"], text, container=[], indent=True
+                translator, "", "", None, indent=False, wrap=True
             )
             self.do_test_contribute(
-                translator, [], "", container=[], indent=False, wrap=False
+                translator, "", "", None, indent=True, wrap=False
             )
             self.do_test_contribute(
-                translator,
-                [text],
-                text,
-                container=[],
-                indent=False,
-                wrap=False,
+                translator, "", "", None, indent=True, wrap=True
+            )
+
+            self.do_test_contribute(translator, text, text, None, indent=False)
+            self.do_test_contribute(
+                translator, f"    {text}", text, None, indent=True
+            )
+            self.do_test_contribute(translator, text, text, None, wrap=False)
+            self.do_test_contribute(translator, wrapped, text, None, wrap=True)
+            self.do_test_contribute(
+                translator, text, text, None, indent=False, wrap=False
             )
             self.do_test_contribute(
-                translator, [], "", container=[], indent=False, wrap=True
+                translator, wrapped, text, None, indent=False, wrap=True
             )
             self.do_test_contribute(
-                translator,
-                wrapped,
-                text,
-                container=[],
-                indent=False,
-                wrap=True,
-            )
-            self.do_test_contribute(
-                translator, [], "", container=[], indent=True, wrap=False
-            )
-            self.do_test_contribute(
-                translator,
-                [f"    {text}"],
-                text,
-                container=[],
-                indent=True,
-                wrap=False,
-            )
-            self.do_test_contribute(
-                translator, [], "", container=[], indent=True, wrap=True
+                translator, f"    {text}", text, None, indent=True, wrap=False
             )
             self.do_test_contribute(
                 translator,
                 wrapped_indented,
                 text,
-                container=[],
+                None,
                 indent=True,
                 wrap=True,
+            )
+
+    def do_test_tags(self, translator, expected, *args, **kwargs):
+        """
+        Perform tests on |HtmlTranslatorBase: tags|.
+
+        :param translator: The |HtmlTranslatorBase| instance
+        :param expected: The expected result
+        :param args: Arguments to |HtmlTranslatorBase: tags|
+        :param kwargs: Key-value arguments to |HtmlTranslatorBase: tags|
+        """
+        translator.start_tag(*args, **kwargs)
+        translator.end_tag(*args, **kwargs)
+        self.assertEqual(translator.astext(), expected)
+        translator.body.clear()
+
+    def test_tags(self):
+        """Test |HtmlTranslatorBase: tags|."""
+        p_indented = "    <p>\n    </p>\n"
+        li_indented = "    <li></li>\n"
+        em_inlined = "<em></em>"
+
+        with self.patcher.patch():
+            translator = HtmlTranslatorBase(self.document, self.app.builder)
+            translator.html_indent_level = 2
+
+            self.do_test_container_param(
+                translator,
+                translator.start_tag,
+                '    <a id="id_A" class="headerlink hidden" href="#target">\n',
+                "a",
+                inline=0,
+                a_href="#target",
+                a_class=("headerlink", "hidden"),
+                a_id="id_A",
+            )
+            self.do_test_container_param(
+                translator, translator.end_tag, "    </p>\n", "p", inline=0
+            )
+
+            self.do_test_tags(translator, p_indented, "p")
+            self.do_test_tags(translator, p_indented, "p", None, 0)
+            self.do_test_tags(translator, p_indented, "p", inline=0)
+            self.do_test_tags(translator, li_indented, "li", None, 1)
+            self.do_test_tags(translator, li_indented, "li", inline=1)
+            self.do_test_tags(translator, em_inlined, "em", None, 2)
+            self.do_test_tags(translator, em_inlined, "em", inline=2)
+
+            translator.start_tag("div")
+            translator.start_tag("ul")
+            translator.start_tag("li", inline=1)
+            translator.start_tag("em", inline=2)
+            translator.end_tag("em", inline=2)
+            translator.end_tag("li", inline=1)
+            translator.start_tag("li", inline=1)
+            translator.start_tag("code", inline=2)
+            translator.end_tag("code", inline=2)
+            translator.end_tag("li", inline=1)
+            translator.end_tag("ul")
+            translator.end_tag("div")
+            self.assertEqual(
+                translator.astext(),
+                (
+                    "    <div>\n"
+                    "      <ul>\n"
+                    "        <li><em></em></li>\n"
+                    "        <li><code></code></li>\n"
+                    "      </ul>\n"
+                    "    </div>\n"
+                ),
+            )
+
+    def test_dispatching(self):
+        """Test dispatching routines."""
+        node = Element()
+        node_attributes = {
+            lvl: tuple(
+                node_attribute_as_str(node, attr, lvl, prefix="\n")
+                for attr in NODE_ATTRIBUTES
+            )
+            for lvl in (1, 2)
+        }
+        node_repr = {
+            lvl: f'{"  " * (lvl - 1)}<Element{"".join(node_attributes[lvl])}>'
+            for lvl in node_attributes
+        }
+
+        with self.patcher.patch():
+            translator = HtmlTranslatorBase(self.document, self.app.builder)
+
+            translator.dispatch_visit(node)
+            with self.assertRaises(NotImplementedError) as cm:
+                translator.dispatch_departure(node)
+            self.assertEqual(
+                cm.exception.args,
+                (f"{type(translator)} departing unknown node type: Element",),
+            )
+            self.assertEqual(
+                self.patcher.logs,
+                [(("unknown node type: %r", node), {"location": node})],
+            )
+
+        self.app.config.abcdoc_debug = True
+        self.patcher.logs.clear()
+        with self.patcher.patch():
+            translator = HtmlTranslatorBase(self.document, self.app.builder)
+
+            translator.dispatch_visit(node)
+            translator.dispatch_visit(node)
+            translator.dispatch_departure(node)
+            translator.dispatch_departure(node)
+            self.assertEqual(
+                self.patcher.logs,
+                [
+                    (("%s", node_repr[1]), {}),
+                    (("unknown node type: %r", node), {"location": node}),
+                    (("%s", node_repr[2]), {}),
+                    (("unknown node type: %r", node), {"location": node}),
+                    (("%s</%s>", "  ", "Element"), {}),
+                    (("%s</%s>", "", "Element"), {}),
+                ],
             )
 
 

@@ -106,6 +106,9 @@
        :meth:`~sphinx_abcdoc_theme.writer.HtmlTranslatorBase.ship_body`
 .. |HtmlTranslatorBase.start_tag| replace::
        :meth:`~sphinx_abcdoc_theme.writer.HtmlTranslatorBase.start_tag`
+.. |HtmlTranslatorBase: tags| replace::
+       :meth:`~sphinx_abcdoc_theme.writer.HtmlTranslatorBase.start_tag` and
+       :meth:`~sphinx_abcdoc_theme.writer.HtmlTranslatorBase.end_tag`
 
 ..
    :mod:`~sphinx_abcdoc_theme.utils`:
