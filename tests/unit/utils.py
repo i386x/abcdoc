@@ -12,13 +12,17 @@ Unit tests utilities.
 .. include:: defs.inc
 """
 
+import collections
 import copy
 import pathlib
 
 from docutils.core import Publisher
 from docutils.io import NullOutput, StringInput, StringOutput
+from docutils.parsers.rst.directives import register_directive
+from docutils.utils import new_document
 from docutils.writers import UnfilteredWriter
 from sphinx.addnodes import toctree as TocTreeNode
+from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.builders.latex.transforms import BibliographyTransform
 from sphinx.builders.latex.transforms import (
     CitationReferenceTransform as LaTeXCitationReferenceTransform,
@@ -34,6 +38,7 @@ from sphinx.builders.latex.transforms import (
     SubstitutionDefinitionsRemover,
 )
 from sphinx.builders.linkcheck import HyperlinkCollector
+from sphinx.directives.other import TocTree
 from sphinx.domains._domains_container import _DomainsContainer
 from sphinx.domains.c import AliasTransform as CAliasTransform
 from sphinx.domains.c import CDomain
@@ -53,6 +58,15 @@ from sphinx.domains.rst import ReSTDomain
 from sphinx.domains.std import StandardDomain
 from sphinx.environment import _CurrentDocument, default_settings
 from sphinx.environment.adapters.toctree import _resolve_toctree
+from sphinx.environment.collectors.asset import (
+    DownloadFileCollector,
+    ImageCollector,
+)
+from sphinx.environment.collectors.dependencies import DependenciesCollector
+from sphinx.environment.collectors.metadata import MetadataCollector
+from sphinx.environment.collectors.title import TitleCollector
+from sphinx.environment.collectors.toctree import TocTreeCollector
+from sphinx.events import EventManager
 from sphinx.ext.extlinks import ExternalLinksChecker
 from sphinx.ext.intersphinx._resolve import IntersphinxRoleResolver
 from sphinx.io import SphinxStandaloneReader
@@ -63,6 +77,7 @@ from sphinx.transforms import (
     AutoNumbering,
     DefaultSubstitutions,
     DoctestTransform,
+    DoctreeReadEvent,
     ExtraTranslatableNodes,
     FilterSystemMessages,
     GlossarySorter,
@@ -103,15 +118,17 @@ from sphinx.transforms.references import (
 from sphinx.util.docutils import (
     docutils_namespace,
     patch_docutils,
+    register_node,
     sphinx_domains,
 )
+from sphinx.util.osutil import relative_uri
 from sphinx.util.rst import default_role
 from sphinx.util.tags import Tags
 from sphinx.versioning import UIDTransform
 from sphinx.writers.html import HTMLWriter
 from vutils.testing.mock import PatcherFactory, make_callable, make_mock
 
-from sphinx_abcdoc_theme.theme import PutToCInsideSection
+from sphinx_abcdoc_theme.theme import PutTocInsideSection, setup
 from sphinx_abcdoc_theme.writer import HtmlTranslator
 
 
@@ -220,6 +237,7 @@ def make_registry():
         FilterSystemMessages,
         UnreferencedFootnotesDetector,
         SphinxSmartQuotes,
+        DoctreeReadEvent,
         GlossarySorter,
         ReorderConsecutiveTargetAndIndexNodes,
         RefOnlyBulletListTransform,
@@ -231,7 +249,7 @@ def make_registry():
         SphinxDanglingReferences,
         SphinxDomains,
         UIDTransform,
-        PutToCInsideSection,
+        PutTocInsideSection,
     ]
 
     def create_domains(env):
@@ -259,20 +277,8 @@ def make_registry():
     registry.get_post_transforms = make_callable(
         lambda: registry.post_transforms
     )
+    register_directive("toctree", TocTree)
     return registry
-
-
-def make_event_manager(app):
-    """
-    Create an |EventManager| mock.
-
-    :param app: The |Sphinx| application instance or mock
-    :return: the |EventManager| mock
-    """
-    em = make_mock(["app", "emit"])
-    em.app = app
-    em.emit = make_callable(lambda *args, **kwargs: None)
-    return em
 
 
 def make_config(**config_overrides):
@@ -285,6 +291,7 @@ def make_config(**config_overrides):
     Mocks the configuration for the |sphinx| documentation generator.
     """
     options = [
+        "author",
         "highlight_language",
         "language",
         "locale_dirs",
@@ -296,6 +303,8 @@ def make_config(**config_overrides):
         "rst_epilog",
         "rst_prolog",
         "trim_footnote_reference_space",
+        "exclude_patterns",
+        "include_patterns",
         "root_doc",
         "source_encoding",
         "source_suffix",
@@ -306,11 +315,15 @@ def make_config(**config_overrides):
         "html_permalinks_icon",
         "html_compact_lists",
         "extlinks_detect_hardcoded_links",
+        "description",
+        "keywords",
         "abcdoc_debug",
         "abcdoctest_transforms",
         "abcdoctest_translator_class",
+        "abcdoctest_sphinx_spec",
     ]
     config = make_mock(options)
+    config.author = config_overrides.get("author", "Author name not set")
     config.highlight_language = config_overrides.get(
         "highlight_language", "default"
     )
@@ -330,6 +343,8 @@ def make_config(**config_overrides):
     config.trim_footnote_reference_space = config_overrides.get(
         "trim_footnote_reference_space", False
     )
+    config.exclude_patterns = config_overrides.get("exclude_patterns", ())
+    config.include_patterns = config_overrides.get("include_patterns", ("**",))
     config.root_doc = config_overrides.get("root_doc", "index")
     config.source_encoding = config_overrides.get(
         "source_encoding", "utf-8-sig"
@@ -358,12 +373,17 @@ def make_config(**config_overrides):
     config.extlinks_detect_hardcoded_links = config_overrides.get(
         "extlinks_detect_hardcoded_links", False
     )
+    config.description = config_overrides.get("description", "")
+    config.keywords = config_overrides.get("keywords", [])
     config.abcdoc_debug = config_overrides.get("abcdoc_debug", False)
     config.abcdoctest_transforms = config_overrides.get(
         "abcdoctest_transforms", []
     )
     config.abcdoctest_translator_class = config_overrides.get(
         "abcdoctest_translator_class", HtmlTranslator
+    )
+    config.abcdoctest_sphinx_spec = config_overrides.get(
+        "abcdoctest_sphinx_spec", True
     )
     return config
 
@@ -382,11 +402,21 @@ def make_environment(app):
         "events",
         "versioning_condition",
         "settings",
+        "metadata",
+        "titles",
+        "longtitles",
+        "tocs",
+        "toc_num_entries",
+        "toctree_includes",
+        "files_to_rebuild",
         "current_document",
         "domaindata",
         "domains",
         "_registry",
+        "doc2path",
+        "found_docs",
         "docname",
+        "master_doctree",
     ]
     env = make_mock(members)
     env.app = app
@@ -404,10 +434,34 @@ def make_environment(app):
     env.settings["language_code"] = app.config.language
     env.settings["smart_quotes"] = True
     env.settings["traceback"] = True
+    env.metadata = collections.defaultdict(dict)
+    env.titles = {}
+    env.longtitles = {}
+    env.tocs = {}
+    env.toc_num_entries = {}
+    env.toctree_includes = {}
+    env.files_to_rebuild = {}
     env.current_document = _CurrentDocument()
     env.domaindata = {}
     env._registry = app.registry
-    env.docname = "<string>"
+
+    def doc2path(docname, absolute=True):
+        """
+        Get the path of the document by its name.
+
+        :param docname: The document name
+        :param absolute: :obj:`True` if the document path should be absolute
+        :return: the document path
+        """
+        path = pathlib.Path(f"{docname}.rst")
+        if absolute:
+            path = (env.srcdir / path).resolve()
+        return path
+
+    env.doc2path = doc2path
+    env.found_docs = set()
+    env.docname = ""
+    env.master_doctree = None
     env.domains = _DomainsContainer._from_environment(
         env, registry=app.registry
     )
@@ -432,9 +486,14 @@ def make_builder(app, env):
         "events",
         "config",
         "tags",
+        "get_translator_class",
         "create_translator",
+        "get_relative_uri",
+        "render_partial",
     ]
-    builder = make_mock(members)
+    builder = make_mock(
+        StandaloneHTMLBuilder if app.config.abcdoctest_sphinx_spec else members
+    )
     builder.name = "html"
     builder.format = "html"
     builder.srcdir = app.srcdir
@@ -447,9 +506,30 @@ def make_builder(app, env):
     builder.tags.add(builder.name)
     builder.tags.add(f"format_{builder.format}")
     builder.tags.add(f"builder_{builder.name}")
+    builder.get_translator_class = make_callable(
+        lambda: app.config.abcdoctest_translator_class
+    )
     builder.create_translator = make_callable(
         app.config.abcdoctest_translator_class
     )
+    builder.get_relative_uri = make_callable(
+        lambda x, y, *unused: relative_uri(f"{x}.html", f"{y}.html")
+    )
+
+    def render_partial(node):
+        """
+        Render the sole :xarg:`node`.
+
+        :param node: The document node to be rendered
+        :return: the dictionary containing rendered bits of :xarg:`node`
+        """
+        if node is None:
+            return {"fragment": ""}
+        doctree = new_document("<partial node>")
+        doctree += node
+        return {"fragment": doctree2html(doctree, app=builder.app)}
+
+    builder.render_partial = render_partial
     return builder
 
 
@@ -463,21 +543,42 @@ def make_application(**config_overrides):
     members = [
         "registry",
         "srcdir",
+        "pdb",
         "events",
         "tags",
         "config",
         "env",
         "builder",
+        "connect",
+        "add_config_value",
+        "set_translator",
+        "add_transform",
+        "add_html_theme",
     ]
+    register_node(TocTreeNode)
     app = make_mock(members)
     app.registry = make_registry()
     app.srcdir = pathlib.Path("./.remove_me")
-    app.events = make_event_manager(app)
+    app.pdb = False
+    app.events = EventManager(app)
+    app.events.add("html-page-context")
+    app.connect = make_callable(lambda e, c: app.events.connect(e, c, 500))
     app.tags = Tags()
     app.config = make_config(**config_overrides)
     app.registry.transforms.extend(app.config.abcdoctest_transforms)
     app.env = make_environment(app)
     app.builder = make_builder(app, app.env)
+    DependenciesCollector().enable(app)
+    ImageCollector().enable(app)
+    DownloadFileCollector().enable(app)
+    MetadataCollector().enable(app)
+    TitleCollector().enable(app)
+    TocTreeCollector().enable(app)
+    app.add_config_value = make_callable(lambda *args, **kwargs: None)
+    app.set_translator = make_callable(lambda *args, **kwargs: None)
+    app.add_transform = make_callable(lambda *args, **kwargs: None)
+    app.add_html_theme = make_callable(lambda *args, **kwargs: None)
+    setup(app)
     return app
 
 
@@ -520,11 +621,12 @@ def make_publisher(app):
     return pub
 
 
-def rst2doctree(source, app):
+def rst2doctree(name, source, app):
     """
     Convert a string in reStructuredText to the document tree.
 
-    :param source: The document source in reStructuredText format
+    :param name: The document name
+    :param source: The document source in the reStructuredText format
     :param app: The |Sphinx| application instance or mock
     :return: the document tree
     """
@@ -533,7 +635,7 @@ def rst2doctree(source, app):
     builder.env.current_document._parser = pub.parser
     with (
         sphinx_domains(builder.env),
-        default_role("<string>", builder.config.default_role),
+        default_role(name, builder.config.default_role),
     ):
         pub.set_source(source)
         pub.publish()
@@ -565,46 +667,71 @@ def doctree2html(doctree, app=None, **config_overrides):
     return docwriter.parts["fragment"]
 
 
-def rst2html(source, **config_overrides):
+def rst2html(sources, **config_overrides):
     """
-    Translate a document from reStructuredText to HTML.
+    Translate documents from reStructuredText to HTML.
 
-    :param source: The source document
+    :param sources: The document sources in the reStructuredText format
     :param config_overrides: Configuration overrides
-    :return: the HTML output
+    :return: page contexts containing translated documents
 
     Mimics what |sphinx| does, with all transforms and domains, but without
     templating. Uses the custom |HtmlTranslator| class.
+
+    Each item from :xarg:`sources` is a dictionary with a document name as the
+    key and the document content in the reStructuredText format as the value.
+
+    The translated documents are returned as a dictionary where a key is a
+    document name and a value is another dictionary representing the page
+    context. The translated document itself is stored under the ``body`` key in
+    the page context.
     """
     with patch_docutils("./docs"), docutils_namespace():
+        contexts = {}
         app = make_application(**config_overrides)
-        doctree = rst2doctree(source, app)
 
-        backup = app.env.current_document
-        new = copy.deepcopy(backup)
-        new.docname = "<string>"
-        try:
-            app.env.current_document = new
-            transformer = SphinxTransformer(doctree)
-            transformer.set_environment(app.env)
-            transformer.add_transforms(app.registry.get_post_transforms())
-            transformer.apply_transforms()
-        finally:
-            app.env.current_document = backup
+        for item in sources:
+            name = tuple(item.keys())[0]
+            source = item[name]
 
-        for toctreenode in doctree.findall(TocTreeNode):
-            result = _resolve_toctree(
-                app.env,
-                "<string>",
-                app.builder,
-                toctreenode,
-                prune=True,
-                includehidden=False,
-                tags=app.builder.tags,
+            app.env.docname = name
+            app.env.found_docs.add(name)
+            doctree = rst2doctree(name, source, app)
+            doctree["source"] = f"{name}.rst"
+
+            backup = app.env.current_document
+            new = copy.deepcopy(backup)
+            new.docname = name
+            try:
+                app.env.current_document = new
+                transformer = SphinxTransformer(doctree)
+                transformer.set_environment(app.env)
+                transformer.add_transforms(app.registry.get_post_transforms())
+                transformer.apply_transforms()
+            finally:
+                app.env.current_document = backup
+
+            if name == app.config.root_doc:
+                app.env.master_doctree = doctree.deepcopy()
+
+            for toctreenode in doctree.findall(TocTreeNode):
+                result = _resolve_toctree(
+                    app.env,
+                    name,
+                    app.builder,
+                    toctreenode,
+                    prune=True,
+                    includehidden=False,
+                    tags=app.builder.tags,
+                )
+                if result is None:
+                    toctreenode.parent.replace(toctreenode, [])
+                else:
+                    toctreenode.replace_self(result)
+
+            contexts[name] = {"body": doctree2html(doctree, app=app)}
+            app.events.emit_firstresult(
+                "html-page-context", name, "page.html", contexts[name], None
             )
-            if result is None:
-                toctreenode.parent.replace(toctreenode, [])
-            else:
-                toctreenode.replace_self(result)
 
-        return doctree2html(doctree, app=app)
+        return contexts

@@ -6,7 +6,11 @@
 #
 # SPDX-License-Identifier: MIT
 #
-"""Test :mod:`sphinx_abcdoc_theme.version` module."""
+"""
+Test :mod:`sphinx_abcdoc_theme.version` module.
+
+.. include:: defs.inc
+"""
 
 from vutils.testing.testcase import TestCase
 

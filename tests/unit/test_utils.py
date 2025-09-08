@@ -151,6 +151,7 @@ class NodeLoggingTestCase(TestCase):
 
     def setUp(self):
         """Set up the test."""
+        #: The fake document node
         self.fake_node = make_type(
             "FakeNode",
             members={
@@ -159,10 +160,13 @@ class NodeLoggingTestCase(TestCase):
                 "current_line": 42,
             },
         )()
+        #: The fake document node without ``tagname``
         self.node_without_tagname = make_type("NodeWithoutTagname")()
+        #: The fake document node with ``tagname`` set to :obj:`None`
         self.node_with_none_tagname = make_type(
             "NodeWithNoneTagname", members={"tagname": None}
         )()
+        #: The fake document node with just ``tagname``
         self.node_with_tagname = make_type(
             "NodeWithTagname", members={"tagname": "tag"}
         )()

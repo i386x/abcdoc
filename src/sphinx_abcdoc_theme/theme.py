@@ -57,7 +57,7 @@ FRAGMENT_KEY: str = "fragment"
 TOCTREE_WRAPPER_CLASS: str = "toctree-wrapper"
 
 
-class PutToCInsideSection(SphinxTransform):
+class PutTocInsideSection(SphinxTransform):
     """
     Put the *Table of Contents* inside a |section| node.
 
@@ -197,7 +197,7 @@ def setup(app: "Sphinx") -> None:
     app.add_config_value("abcdoc_debug", False, "env")
     app.add_config_value("description", "", "env")
     app.add_config_value("keywords", [], "env")
-    app.add_transform(PutToCInsideSection)
+    app.add_transform(PutTocInsideSection)
     app.add_html_theme("abcdoc", pathlib.Path(__file__).resolve().parent)
     app.set_translator("html", HtmlTranslator, override=True)
     app.connect("html-page-context", setup_context)

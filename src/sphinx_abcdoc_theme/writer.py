@@ -1081,6 +1081,22 @@ class HtmlTranslator(HtmlTranslatorBase):
         if NAVBAR_ATTR in node and node[NAVBAR_ATTR]:
             self.context.pop_scope(NAVBAR_SCOPE)
 
+    def visit_compound(self, node: "Element") -> None:
+        """
+        Start the translation of the |compound| document node.
+
+        :param node: The |compound| document node
+        """
+        self.collect_ids(node)
+
+    @staticmethod
+    def depart_compound(unused_node: "Element") -> None:
+        """
+        Finish the translation of the |compound| document node.
+
+        :param unused_node: The |compound| document node
+        """
+
     def visit_document(self, node: "document") -> None:
         """
         Start the translation of the |document|.

@@ -92,4 +92,4 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
-abcdoc_debug = True
+abcdoc_debug = False

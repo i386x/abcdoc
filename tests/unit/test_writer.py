@@ -17,13 +17,17 @@ import logging
 from docutils.nodes import (
     Element,
     Text,
+    bullet_list,
     list_item,
     paragraph,
     reference,
     section,
+    target,
     title,
 )
 from docutils.utils import new_document
+from sphinx.addnodes import compact_paragraph
+from sphinx.errors import ThemeError
 from sphinx.transforms import SphinxTransform
 from vutils.testing.testcase import TestCase
 from vutils.yaml.load import load_yaml
@@ -151,6 +155,46 @@ def document_with_illformed_reference():
     return root
 
 
+def document_with_target_nodes():
+    """
+    Create a document with target nodes.
+
+    :return: the document (document tree) with target nodes
+    """
+    root = new_document("<target nodes>")
+    root += target(refid="a")
+    root += target(refid="b")
+    root += paragraph()
+    root[-1] += Text("Some text.")
+    return root
+
+
+def navbar_with_paragraphs():
+    """
+    Create a document with a navigation bar containing paragraphs.
+
+    :return: the document (document tree) with the navigation bar containing
+        paragraphs
+    """
+    root = new_document("<partial node>")
+    root += compact_paragraph()
+    root[-1]["navbar"] = True
+    root[-1] += bullet_list()
+    root[-1][-1] += list_item()
+    root[-1][-1][-1] += paragraph()
+    root[-1][-1][-1][-1] += reference(refuri="install.html")
+    root[-1][-1][-1][-1][-1] += Text("Installation")
+    root[-1][-1] += list_item()
+    root[-1][-1][-1] += paragraph()
+    root[-1][-1][-1][-1] += reference(refuri="")
+    root[-1][-1][-1][-1][-1] += Text("User Guide")
+    root[-1][-1] += list_item()
+    root[-1][-1][-1] += paragraph()
+    root[-1][-1][-1][-1] += reference(refuri="glossary.html")
+    root[-1][-1][-1][-1][-1] += Text("Glossary")
+    return root
+
+
 class SimplifyListItemsTransform(SphinxTransform):
     """
     Delegate |paragraph|'s children to the |list_item|.
@@ -222,6 +266,13 @@ cases:
   - unprocessed_pending_ids
   - ill-formed_reference
   - broken_body
+  - missing_toctree
+  - wrong_builder
+  - target_nodes
+  - paragraphs_in_navbar
+  - navbar
+  - heading
+  - heading_no_permalinks
   - paragraph
   - bullet_list
 
@@ -229,11 +280,12 @@ conflicting_ids:
   input:
     type: doctree
     doctree: conflicting_ids
+
   output:
-    type: exception
-    exception: ConflictingIdError
-    exception_args:
-      - >-
+    type: html
+    exception:
+      type: ConflictingIdError
+      args: >-
         Id `subtitle-a` from `<section ids="('subtitle-b',
         'subtitle-a')"><title>Subtitle B</title><paragraph>Some
         text.</paragraph></section>` already used
@@ -242,11 +294,12 @@ ambiguous_ids:
   input:
     type: doctree
     doctree: ambiguous_ids
+
   output:
-    type: exception
-    exception: AmbiguousIdsError
-    exception_args:
-      - >-
+    type: html
+    exception:
+      type: AmbiguousIdsError
+      args: >-
         More than 1 ids (para-a, para-b) are trying to reference `<paragraph
         ids="('para-a', 'para-b')">Some text.</paragraph>`
 
@@ -254,83 +307,274 @@ unprocessed_pending_ids:
   input:
     type: doctree
     doctree: unprocessed_pending_ids
+
   output:
-    type: exception
-    exception: UnprocessedPendingIdsError
-    exception_args:
-      - >-
+    type: html
+    exception:
+      type: UnprocessedPendingIdsError
+      args: >-
         Unprocessed pending ids: para-a, para-c
 
 ill-formed_reference:
   input:
     type: doctree
     doctree: ill-formed_reference
+
   output:
-    type: exception
-    exception: MissingRefError
-    exception_args:
-      - >-
+    type: html
+    exception:
+      type: MissingRefError
+      args: >-
         `<reference/>` has no `refurl` or `refid`
 
 broken_body:
   settings: broken_body_settings
-  input:
-    type: rst
-    rst: |
-      * item
-  output:
-    type: exception
-    exception: BrokenBodyError
-    exception_args:
-      - >-
-        Broken output/body content: Expected newline character
 
-paragraph:
   input:
     type: rst
-    rst: |
-      Some text.
+    rst:
+      - index: |
+          * item
 
   output:
     type: html
-    html: |
+    exception:
+      type: BrokenBodyError
+      args: >-
+        Broken output/body content: Expected newline character
+
+missing_toctree:
+  input:
+    type: rst
+    rst:
+      - index: |
+          Some text.
+
+  output:
+    type: navbar
+    exception:
+      type: ThemeError
+      args: >-
+        Document has no toctree nodes
+
+wrong_builder:
+  settings: no_sphinx_spec_settings
+
+  input:
+    type: rst
+    rst:
+      - glossary: |
+          Glossary
+          ========
+
+          Some text.
+
+      - index: |
+          Heading
+          =======
+
+          Some text.
+
+          .. toctree::
+             :caption: Table of Contents
+             :maxdepth: 2
+
+             glossary
+
+  output:
+    type: navbar
+    exception:
+      type: ThemeError
+      args: >-
+        `navbar()` can be only used within the `html` output context
+
+target_nodes:
+  input:
+    type: doctree
+    doctree: document_with_target_nodes
+
+  output:
+    type: raw
+    raw: |
       <p>
         Some text.
       </p>
 
-bullet_list:
+paragraphs_in_navbar:
+  input:
+    type: doctree
+    doctree: navbar_with_paragraphs
+
+  output:
+    type: raw
+    raw: |
+      <a href="install.html">Installation</a>
+      <a href="#">User Guide</a>
+      <a href="glossary.html">Glossary</a>
+
+navbar:
   input:
     type: rst
-    rst: |
-      This is a list:
+    rst:
+      - installation: |
+          Installation
+          ============
 
-      * item A
-      * item B
-      * item C
+          How to install.
+
+      - user_guide: |
+          User Guide
+          ==========
+
+          Welcome to our user guide.
+
+      - reference_guide: |
+          Reference Guide
+          ===============
+
+          All you need to know.
+
+      - index: |
+          Home
+          ====
+
+          Home page.
+
+          .. toctree::
+             :caption: Table of Contents
+             :maxdepth: 2
+
+             installation
+             user_guide
+             reference_guide
+
+  output:
+    type: navbar
+    navbar:
+      index: |
+        <a href="installation.html">Installation</a>
+        <a href="user_guide.html">User Guide</a>
+        <a href="reference_guide.html">Reference Guide</a>
+      user_guide: |
+        <a href="installation.html">Installation</a>
+        <a href="#">User Guide</a>
+        <a href="reference_guide.html">Reference Guide</a>
+
+heading:
+  settings: heading_settings
+
+  input:
+    type: rst
+    rst:
+      - index: |
+          Heading
+          =======
+
+          Some text.
 
   output:
     type: html
-    html: |
-      <p>
-        This is a list:
-      </p>
-      <ul>
-        <li>
+    html:
+      index: |
+        <section id="heading">
+          <h1>Heading<a class="headerlink" href="#heading">&#x00B6;</a></h1>
+          <div class="right-quote">
+            Some description
+          </div>
           <p>
-            item A
+            Some text.
           </p>
-        </li>
-        <li>
+        </section>
+
+heading_no_permalinks:
+  settings: no_permalinks_settings
+
+  input:
+    type: rst
+    rst:
+      - index: |
+          Heading
+          =======
+
+          Some text.
+
+  output:
+    type: html
+    html:
+      index: |
+        <section id="heading">
+          <h1>Heading</h1>
           <p>
-            item B
+            Some text.
           </p>
-        </li>
-        <li>
-          <p>
-            item C
-          </p>
-        </li>
-      </ul>
+        </section>
+
+paragraph:
+  input:
+    type: rst
+    rst:
+      - index: |
+          .. |foo| replace:: bar
+          ..
+             Comment.
+
+          .. compound::
+
+             Line of text.
+
+             Another line of text.
+
+          Some text.
+
+  output:
+    type: html
+    html:
+      index: |
+        <p>
+          Line of text.
+        </p>
+        <p>
+          Another line of text.
+        </p>
+        <p>
+          Some text.
+        </p>
+
+bullet_list:
+  input:
+    type: rst
+    rst:
+      - index: |
+          This is a list:
+
+          * item A
+          * item B
+          * item C
+
+  output:
+    type: html
+    html:
+      index: |
+        <p>
+          This is a list:
+        </p>
+        <ul>
+          <li>
+            <p>
+              item A
+            </p>
+          </li>
+          <li>
+            <p>
+              item B
+            </p>
+          </li>
+          <li>
+            <p>
+              item C
+            </p>
+          </li>
+        </ul>
 """
 )
 #: Definitions of terms used in :const:`.CASES`
@@ -348,6 +592,14 @@ TERMS = {
         "abcdoctest_translator_class": BrokenHtmlTranslator,
     },
     "BrokenBodyError": BrokenBodyError,
+    "ThemeError": ThemeError,
+    "no_sphinx_spec_settings": {"abcdoctest_sphinx_spec": False},
+    "document_with_target_nodes": document_with_target_nodes(),
+    "navbar_with_paragraphs": navbar_with_paragraphs(),
+    "heading_settings": {"description": "Some description"},
+    "no_permalinks_settings": {
+        "html_permalinks": False,
+    },
 }
 
 
@@ -1230,29 +1482,44 @@ class HtmlTranslatorTestCase(TestCase):
 
         :param case: The test case definition
         :param config_overrides: Configuration overrides
+        :raises ValueError: when the test case definition is ill-formed
+        :raises KeyError: when the test case definition is ill-formed
+        :raises TypeError: when the test case definition is ill-formed
 
         Every test case is a mapping that must contain ``input`` and
         ``output``. Additionally, it may contain ``settings``.
 
         ``input`` is a mapping that must contain ``type``. The possible values
         for ``type`` are ``doctree`` and ``rst``. If ``type`` is ``doctree``,
-        then the ``input`` must also contain ``doctree`` holding a key to
-        :const:`.TERMS` under which an input document tree can be find. If
-        ``type`` is ``rst``, the the ``input`` must also contain ``rst``
-        holding a raw document source in reStructuredText format.
+        then the ``input`` must also contain ``doctree``, holding a key to
+        :const:`.TERMS` under which an input document tree can be found. If
+        ``type`` is ``rst``, then the ``input`` must also contain ``rst``,
+        holding a list of mappings where each of them is containing just one
+        key, being a document name, under which the raw source of the document
+        in the reStructuredText format is stored.
 
         ``output`` is a mapping that must contain ``type``. The possible values
-        for ``type`` are ``exception`` and ``html``.
+        for ``type`` are ``html``, ``navbar``, and ``raw``. Additionally,
+        ``output`` may also contain ``exception``.
 
-        If ``type`` is ``exception``, then the next mandatory key to ``output``
-        is ``exception`` holding a key to :const:`.TERMS` under which the
-        expected exception to be caught can be find. If ``output`` also contain
-        the ``exception_args`` key, under which a list of expected arguments of
-        the exception is stored, then these expected arguments are test for
-        equality with the list of arguments of the caught exception.
+        If ``exception`` is present in ``output``, it must be a mapping that
+        must contain ``type`` and may contain ``args``. ``type`` is holding a
+        key to :const:`.TERMS` under which the expected exception to be caught
+        can be found. ``args`` is a list of expected arguments given to the
+        caught exception when it was raised. ``args`` may also be a string,
+        meaning that it is a list containing just that string. ``exception``
+        has a priority over ``type``, meaning that if it is present the given
+        exception with the given arguments must be raised by the test case.
+        Note that in this case ``type`` may give a hint which part of the test
+        case is about to raise the exception.
 
-        If ``type`` is ``html``, then the next mandatory key to ``output`` is
-        ``html`` holding the expected raw HTML output.
+        If ``exception`` is not present in ``output``, then ``output`` must
+        contain ``html``, ``navbar``, or ``raw`` if ``type`` is ``html``,
+        ``navbar``, or ``raw``, respectively, where ``html`` and ``navbar``
+        are mappings between a document name and the expected HTML code of the
+        document or navigation bar, respectively, and ``raw`` holds a value of
+        unspecified format that does not fit in any of previous cases. Note
+        that ``raw`` is the only accepted ``output`` ``type`` for ``doctree``.
 
         ``settings`` holds a key to :const:`.TERMS` under which a :class:`dict`
         containing overrides for :xarg:`config_overrides` is stored.
@@ -1265,34 +1532,64 @@ class HtmlTranslatorTestCase(TestCase):
           transforms
         * ``abcdoctest_translator_class`` specifies the translator class (the
           default is |HtmlTranslator|)
+        * ``abcdoctest_sphinx_spec`` specifies whether to use Sphinx classes as
+          ``spec`` argument to :class:`~unittest.mock.Mock` (default is
+          :obj:`True`)
         """
         input_type = case["input"]["type"]
         output_type = case["output"]["type"]
 
-        convert = None
-        if input_type == "doctree":
-            convert = doctree2html
-        elif input_type == "rst":
-            convert = rst2html
-        if convert is None:
-            raise ValueError(f"Unknown input type: {input_type}")
-
         source = case["input"][input_type]
         if input_type == "doctree":
             source = TERMS[source]
-        expected = case["output"][output_type]
+        expected = case["output"].get(output_type, None)
 
         settings = case.get("settings", None)
         if settings is not None:
             config_overrides.update(TERMS[settings])
 
-        if output_type == "exception":
-            with self.assertRaises(TERMS[expected]) as cm:
+        def convert(source, **config_overrides):
+            """
+            Convert the source to the expected output.
+
+            :param source: The source
+            :param config_overrides: Configuration overrides
+            :return: the expected output
+            :raises ValueError: when the test case definition is ill-formed
+            :raises KeyError: when the test case definition is ill-formed
+            :raises TypeError: when the test case definition is ill-formed
+
+            This is the auxiliary function internally used by
+            :meth:`~HtmlTranslatorTestCase.do_case`.
+            """
+            result = None
+            if input_type == "doctree":
+                result = doctree2html(source, **config_overrides)
+            elif input_type == "rst":
+                result = rst2html(source, **config_overrides)
+            else:
+                raise ValueError(f"Unknown input type: {input_type}")
+            if output_type in ("navbar", "html"):
+                key = {"html": "body"}.get(output_type, output_type)
+                result = {
+                    name: result[name][key]
+                    for name in (result if expected is None else expected)
+                }
+            if output_type == "navbar":
+                result = {name: result[name]() for name in result}
+            return result
+
+        if "exception" in case["output"]:
+            with self.assertRaises(
+                TERMS[case["output"]["exception"]["type"]]
+            ) as cm:
                 convert(source, **config_overrides)
-            exception_args = case["output"].get("exception_args", None)
-            if exception_args is not None:
-                self.assertEqual(cm.exception.args, tuple(exception_args))
-        elif output_type in ("html",):
+            args = case["output"]["exception"].get("args", None)
+            if isinstance(args, str):
+                args = [args]
+            if args is not None:
+                self.assertEqual(cm.exception.args, tuple(args))
+        elif output_type in ("html", "navbar", "raw"):
             self.assertEqual(convert(source, **config_overrides), expected)
         else:
             raise ValueError(f"Unknown output type: {output_type}")
