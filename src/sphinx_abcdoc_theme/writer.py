@@ -67,24 +67,6 @@ PARTIAL_NODE_NAME: str = "<partial node>"
 NAVBAR_SCOPE: str = "navbar"
 
 
-def node_source(
-    node: "Element", default: "StrPath | None" = None
-) -> "StrPath | None":
-    """
-    Get the document node source.
-
-    :param node: The document node
-    :param default: The default document node source
-    :return: the document node source
-
-    Get the source of :xarg:`node` if there is some. Otherwise, use
-    :xarg:`default`.
-    """
-    if SOURCE_ATTR not in node:
-        return default
-    return node[SOURCE_ATTR]
-
-
 def is_partial_node(node: "Element") -> bool:
     """
     Test whether the document node is a partial node.
